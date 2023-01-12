@@ -1,6 +1,9 @@
 import { Router } from 'itty-router';
 const router = Router();
 
+const cache = caches.default;
+
+let request;
 let env;
 let ctx;
 let hashedIP;
@@ -58,6 +61,32 @@ async function generateHash(message){
 	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+async function getToken(username){
+	let token = null;
+	let key = 'token-' + username + '-' + hashedIP;
+
+	let cacheKey = request.url + "?key=" + key;
+	let res = await cache.match(cacheKey);
+	if(res) token = await res.text();
+
+	if(token == null){
+		token = await env.KV.get(key, { cacheTtl: 3600 });
+		let nres = new Response(token);
+		nres.headers.append('Cache-Control', 's-maxage=60');
+		if(token != null) await cache.put(cacheKey, nres);
+	}
+
+	if(token == null){
+		token = await generateHash(generateCodes());
+		await env.KV.put(key, token, { expirationTtl: 86400 });
+		let nres = new Response(token);
+		nres.headers.append('Cache-Control', 's-maxage=60');
+		await cache.put(cacheKey, nres);
+	}
+
+	return token;
+}
+
 async function isUsernameTaken(username){
 	try{
 		const { results } = await env.DB.prepare("SELECT username FROM creators WHERE username = ?").bind(username).all();
@@ -99,20 +128,13 @@ router.post("/login", async request => {
 	try{
 		const { results } = await env.DB.prepare("SELECT username, created, accessed FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
 		if(results.length == 1){
-			let userID = data.username + '-' + hashedIP;
-			let token = await env.KV.get("token_" + userID, { cacheTtl: 3600 });
+			let token = await getToken(data.username);
 			let json = {
 				"token": token,
 				"username": results[0].username,
 				"accessed": results[0].accessed,
 				"created": results[0].created
 			};
-			if(token != null){
-				return jsonResponse({ "error": 0, "info": "Success", "data": json });
-			}
-			token = await generateHash(generateCodes());
-			await env.KV.put("token_" + userID, token, { expirationTtl: 86400 });
-			json.token = token;
 			return jsonResponse({ "error": 0, "info": "Success", "data": json });
 		}
 		return jsonResponse({ "error": 1007, "info": "Password is incorrect." });
@@ -163,12 +185,13 @@ router.all("*", () => {
 });
 
 export default {
-	async fetch(request, env2, ctx2){
+	async fetch(request2, env2, ctx2){
+		request = request2;
 		env = env2;
 		ctx = ctx2;
 		let date = new Date().toISOString().split('T')[0];
-		let IP = request.headers.get('CF-Connecting-IP');
+		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
-		return router.handle(request);
+		return router.handle(request2);
 	},
 };
