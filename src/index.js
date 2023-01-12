@@ -61,27 +61,41 @@ async function generateHash(message){
 	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+async function setValue(key, value, expirationTime = 86400, cacheTime = 600){
+	let cacheKey = request.url + "?key=" + key;
+	// Save value
+	await env.KV.put(key, value, { expirationTtl: expirationTime });
+	// Cache value
+	let nres = new Response(value);
+	nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
+	await cache.put(cacheKey, nres);
+}
+
+async function getValue(key, cacheTime = 600){
+	let value = null;
+
+	let cacheKey = request.url + "?key=" + key;
+	let res = await cache.match(cacheKey);
+	if(res) value = await res.text();
+
+	if(value == null){
+		value = await env.KV.get(key, { cacheTtl: cacheTime });
+		let nres = new Response(value);
+		nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
+		if(value != null) await cache.put(cacheKey, nres);
+	}
+
+	return value;
+}
+
 async function getToken(username){
 	let token = null;
 	let key = 'token-' + username + '-' + hashedIP;
 
-	let cacheKey = request.url + "?key=" + key;
-	let res = await cache.match(cacheKey);
-	if(res) token = await res.text();
-
-	if(token == null){
-		token = await env.KV.get(key, { cacheTtl: 3600 });
-		let nres = new Response(token);
-		nres.headers.append('Cache-Control', 's-maxage=60');
-		if(token != null) await cache.put(cacheKey, nres);
-	}
-
+	token = await getValue(key);
 	if(token == null){
 		token = await generateHash(generateCodes());
-		await env.KV.put(key, token, { expirationTtl: 86400 });
-		let nres = new Response(token);
-		nres.headers.append('Cache-Control', 's-maxage=60');
-		await cache.put(cacheKey, nres);
+		await setValue(key, token);
 	}
 
 	return token;
