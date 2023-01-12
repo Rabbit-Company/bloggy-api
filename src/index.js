@@ -11,9 +11,7 @@ let hashedIP;
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
 	return new Response(json, {
-		headers: {
-			"Content-Type": "application/json"
-		},
+		headers: { "Content-Type": "application/json" },
 		status: statusCode
 	});
 }
@@ -63,9 +61,7 @@ async function generateHash(message){
 
 async function setValue(key, value, expirationTime = 86400, cacheTime = 600){
 	let cacheKey = request.url + "?key=" + key;
-	// Save value
 	await env.KV.put(key, value, { expirationTtl: expirationTime });
-	// Cache value
 	let nres = new Response(value);
 	nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
 	await cache.put(cacheKey, nres);
