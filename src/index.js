@@ -1,5 +1,4 @@
 import { Router } from 'itty-router';
-
 const router = Router();
 
 let env;
@@ -25,6 +24,14 @@ function isPasswordValid(password){
 
 function isEmailValid(email){
 	return /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email);
+}
+
+async function generateHash(value){
+	value = new TextEncoder().encode(value);
+	value = await crypto.subtle.digest({ name: 'SHA-512' }, value);
+	value = Array.from(new Uint8Array(value));
+	value = value.map(b => b.toString(16).padStart(2, '0')).join('');
+	return value;
 }
 
 async function isUsernameRegistered(username){
@@ -84,10 +91,10 @@ router.post("/register", async request => {
 		return jsonResponse({ "error": 1004, "info": "Invalid email address." });
 	}
 
+	let password = await generateHash(data.password);
 	let date = new Date().toISOString().split('T')[0];
-	let result;
 	try{
-		result = await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, data.password, data.email, date, date).run();
+		await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, password, data.email, date, date).run();
 	}catch(error){
 		return jsonResponse({ "error": 1005, "info": "Username is already registered." });
 	}
