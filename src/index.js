@@ -51,6 +51,8 @@ router.all("*", () => {
 	return jsonResponse(json, 404);
 });
 
-addEventListener('fetch', (e) => {
-	e.respondWith(router.handle(e.request));
-});
+export default {
+	async fetch(request, env, ctx){
+		return router.handle(request);
+	},
+};
