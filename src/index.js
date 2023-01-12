@@ -15,63 +15,88 @@ function jsonResponse(json, statusCode = 200){
 	});
 }
 
+function isUsernameValid(username){
+	return /^([a-z][a-z0-9\-]{3,29})$/.test(username);
+}
+
+function isPasswordValid(password){
+	return /^([a-z0-9]{128})$/.test(password);
+}
+
+function isEmailValid(email){
+	return /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email);
+}
+
 async function isUsernameRegistered(username){
 	const { results } = await env.DB.prepare("SELECT username FROM creators WHERE username = ?").bind(username).all();
 	if(results.length == 1) return true;
 	return false;
 }
 
-router.post("/register", async request => {
-	let json = {};
+async function authorizeCreator(username, password, otp){
+
+}
+
+router.post("/login", async request => {
 	let data = {};
 
 	try{
 		data = await request.json();
 	}catch{
-		json = { "error": 1000, "info": "Data needs to be submitted in json format." };
-		return jsonResponse(json);
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.password || !data.otp){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, otp" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isPasswordValid(data.password)){
+		return jsonResponse({ "error": 1003, "info": "Password needs to be hashed with Argon2id. The length of hashed password needs to be 128 characters." });
+	}
+});
+
+router.post("/register", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
 	}
 
 	if(!data.username || !data.password || !data.email){
-		json = { "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email" };
-		return jsonResponse(json);
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email" });
 	}
 
-	if(!(/^([a-z][a-z0-9\-]{3,29})$/.test(data.username))){
-		json = { "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." };
-		return jsonResponse(json);
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
 	}
 
-	if(!(/^([a-z0-9]{128})$/.test(data.password))){
-		json = { "error": 1003, "info": "Password needs to be hashed with Argon2id. The length of hashed password needs to be 128 characters." };
-		return jsonResponse(json);
+	if(!isPasswordValid(data.password)){
+		return jsonResponse({ "error": 1003, "info": "Password needs to be hashed with Argon2id. The length of hashed password needs to be 128 characters." });
 	}
 
-	if(!(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(data.email))){
-		json = { "error": 1004, "info": "Invalid email address." };
-		return jsonResponse(json);
-	}
-
-	if(await isUsernameRegistered(data.username)){
-		json = { "error": 1005, "info": "Username is already registered." };
-		return jsonResponse(json);
+	if(!isEmailValid(data.email)){
+		return jsonResponse({ "error": 1004, "info": "Invalid email address." });
 	}
 
 	let date = new Date().toISOString().split('T')[0];
-	const result = await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, data.password, data.email, date, date).run();
-
-	if(!result.success){
-		json = { "error": 1006, "info": "Something went wrong while inserting data to the database. Please try again later." };
-		return jsonResponse(json);
+	let result;
+	try{
+		result = await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, data.password, data.email, date, date).run();
+	}catch(error){
+		return jsonResponse({ "error": 1005, "info": "Username is already registered." });
 	}
 
-	json = { "error": 0, "info": "Success" };
-	return jsonResponse(json);
+	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
 router.all("*", () => {
-	let json = { "error": 404, "info": "Invalid API endpoint" };
-	return jsonResponse(json, 404);
+	return jsonResponse({ "error": 404, "info": "Invalid API endpoint" }, 404);
 });
 
 export default {
