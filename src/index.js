@@ -2,7 +2,7 @@ import { Router } from 'itty-router';
 const router = Router();
 
 const cache = caches.default;
-
+let date;
 let request;
 let env;
 let ctx;
@@ -145,6 +145,9 @@ router.post("/login", async request => {
 				"accessed": results[0].accessed,
 				"created": results[0].created
 			};
+			try{
+				if(results[0].accessed != date) await env.DB.prepare("UPDATE creators SET accessed = ?1 WHERE username = ?2").bind(date, data.username).run();
+			}catch{}
 			return jsonResponse({ "error": 0, "info": "Success", "data": json });
 		}
 		return jsonResponse({ "error": 1007, "info": "Password is incorrect." });
@@ -180,7 +183,6 @@ router.post("/register", async request => {
 	}
 
 	let password = await generateHash(data.password);
-	let date = new Date().toISOString().split('T')[0];
 	try{
 		await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, password, data.email, date, date).run();
 	}catch(error){
@@ -199,7 +201,7 @@ export default {
 		request = request2;
 		env = env2;
 		ctx = ctx2;
-		let date = new Date().toISOString().split('T')[0];
+		date = new Date().toISOString().split('T')[0];
 		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
 		return router.handle(request2);
