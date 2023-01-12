@@ -24,7 +24,7 @@ router.post("/register", async request => {
 	}
 
 	if(!data.username || !data.password || !data.email){
-		json = { "error": 1001, "info": "Not all required data provided in json format." }
+		json = { "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email" }
 		return jsonResponse(json);
 	}
 
@@ -35,6 +35,11 @@ router.post("/register", async request => {
 
 	if(!(/^([a-z0-9]{128})$/.test(data.password))){
 		json = { "error": 1003, "info": "Password needs to be hashed with Argon2id. The length of hashed password needs to be 128 characters." }
+		return jsonResponse(json);
+	}
+
+	if(!(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(data.email))){
+		json = { "error": 1004, "info": "Invalid email address." }
 		return jsonResponse(json);
 	}
 
