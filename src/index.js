@@ -583,6 +583,7 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
+		let avatar = env.CDN + "/avatars/" + username + ".png";
 		let twitter = rUser.social?.twitter || env.TWITTER;
 
 		let tempTemplate = templatePost;
@@ -617,6 +618,11 @@ router.post("/generatePages", async request => {
 		if(typeof(rUser.social?.github) === 'string') social += "<a href='" + rUser.social.github + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Github</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5'></path></svg></a>";
 		tempTemplate = tempTemplate.replaceAll("::social::", social);
 
+		let html = "<h1 class='post-title'>" + title + "</h1>";
+		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + created + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
+		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' loading='lazy' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
+
+		tempTemplate = tempTemplate.replaceAll("::post::", html);
 		return jsonResponse({"html": tempTemplate});
 	}
 
