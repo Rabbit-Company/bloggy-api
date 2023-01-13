@@ -38,6 +38,18 @@ function isOTPValid(otp){
 	return (otp.length === 0 || otp.length === 6 || otp.length === 44);
 }
 
+function isTitleValid(title){
+	return (title.length >= 3 && title.length <= 30);
+}
+
+function isDescriptionValid(description){
+	return (description.length >= 30 && description.length <= 160);
+}
+
+function isAuthorValid(author){
+	return (author.length >= 5 && author.length <= 30);
+}
+
 function generateNonce(){
 	let nonce = "";
 	for(let i = 0; i < 5; i++) nonce += getRandomInt(999999, 100000) + 'p';
@@ -166,8 +178,8 @@ router.post("/register", async request => {
 		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
 	}
 
-	if(!data.username || !data.password || !data.email){
-		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email" });
+	if(!data.username || !data.password || !data.email || !data.title || !data.description || !data.author){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email, title, description, author" });
 	}
 
 	if(!isUsernameValid(data.username)){
@@ -180,6 +192,18 @@ router.post("/register", async request => {
 
 	if(!isEmailValid(data.email)){
 		return jsonResponse({ "error": 1004, "info": "Invalid email address." });
+	}
+
+	if(!isTitleValid(data.title)){
+		return jsonResponse({ "error": 1009, "info": "Title needs to be between 3 and 30 characters long." });
+	}
+
+	if(!isDescriptionValid(data.description)){
+		return jsonResponse({ "error": 1010, "info": "Description needs to be between 30 and 160 characters long." });
+	}
+
+	if(!isAuthorValid(data.author)){
+		return jsonResponse({ "error": 1011, "info": "Author needs to be between 5 and 30 characters long." });
 	}
 
 	let password = await generateHash(data.password);
