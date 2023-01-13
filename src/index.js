@@ -585,6 +585,16 @@ router.post("/generatePages", async request => {
 
 		let tempTemplate = templatePost;
 		tempTemplate = tempTemplate.replaceAll("::metatitle::", title);
+		tempTemplate = tempTemplate.replaceAll("::metaDescription::", description);
+		tempTemplate = tempTemplate.replaceAll("::language::", language);
+		tempTemplate = tempTemplate.replaceAll("::metaAuthor::", rUser.author);
+		tempTemplate = tempTemplate.replaceAll("::metaTag::", tag);
+		tempTemplate = tempTemplate.replaceAll("::metaCategory::", category);
+		tempTemplate = tempTemplate.replaceAll("::metaPublishedTime::", new Date(created).toISOString());
+		tempTemplate = tempTemplate.replaceAll("::metaModifiedTime::", new Date().toISOString());
+		tempTemplate = tempTemplate.replaceAll("::metaImage::", picture);
+		tempTemplate = tempTemplate.replaceAll("::title::", rUser.title);
+		tempTemplate = tempTemplate.replaceAll("::description::", rUser.description);
 
 		return jsonResponse({"picture": picture, "html": tempTemplate});
 	}
