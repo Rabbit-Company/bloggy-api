@@ -145,7 +145,7 @@ async function generateHash(message){
 	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function setValue(key, value, expirationTime = null, cacheTime = 60){
+async function setAdminValue(key, value, expirationTime = null, cacheTime = 60){
 	let cacheKey = request.url + "?key=" + key;
 	if(expirationTime === null){
 		await env.AKV.put(key, value);
@@ -157,7 +157,19 @@ async function setValue(key, value, expirationTime = null, cacheTime = 60){
 	await cache.put(cacheKey, nres);
 }
 
-async function getValue(key, cacheTime = 60){
+async function setPageValue(key, value, expirationTime = null, cacheTime = 60){
+	let cacheKey = request.url + "?key=" + key;
+	if(expirationTime === null){
+		await env.PKV.put(key, value);
+	}else{
+		await env.PKV.put(key, value, { expirationTtl: expirationTime });
+	}
+	let nres = new Response(value);
+	nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
+	await cache.put(cacheKey, nres);
+}
+
+async function getAdminValue(key, cacheTime = 60){
 	let value = null;
 
 	let cacheKey = request.url + "?key=" + key;
@@ -174,8 +186,30 @@ async function getValue(key, cacheTime = 60){
 	return value;
 }
 
-async function deleteValue(key){
+async function getPageValue(key, cacheTime = 60){
+	let value = null;
+
+	let cacheKey = request.url + "?key=" + key;
+	let res = await cache.match(cacheKey);
+	if(res) value = await res.text();
+
+	if(value == null){
+		value = await env.PKV.get(key, { cacheTtl: cacheTime });
+		let nres = new Response(value);
+		nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
+		if(value != null) await cache.put(cacheKey, nres);
+	}
+
+	return value;
+}
+
+async function deleteAdminValue(key){
 	await env.AKV.delete(key);
+	await cache.delete(request.url + "?key=" + key);
+}
+
+async function deletePageValue(key){
+	await env.PKV.delete(key);
 	await cache.delete(request.url + "?key=" + key);
 }
 
@@ -183,10 +217,10 @@ async function forceGetToken(username){
 	let token = null;
 	let key = 'token-' + username + '-' + hashedIP;
 
-	token = await getValue(key);
+	token = await getAdminValue(key);
 	if(token == null){
 		token = await generateHash(generateCodes());
-		await setValue(key, token, 86400);
+		await setAdminValue(key, token, 86400);
 	}
 
 	return token;
@@ -194,7 +228,7 @@ async function forceGetToken(username){
 
 async function isAuthorized(username, token){
 	let key = 'token-' + username + '-' + hashedIP;
-	let token2 = await getValue(key);
+	let token2 = await getAdminValue(key);
 	if(token2 === null) return false;
 	if(token === token2) return true;
 	return false;
@@ -368,7 +402,7 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
 	}
 
-	await deleteValue('token-' + data.username + '-' + hashedIP);
+	await deleteAdminValue('token-' + data.username + '-' + hashedIP);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
