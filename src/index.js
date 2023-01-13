@@ -199,7 +199,15 @@ async function isAuthorized(username, token){
 async function isUsernameTaken(username){
 	try{
 		const { results } = await env.DB.prepare("SELECT username FROM creators WHERE username = ?").bind(username).all();
-		if(results.length == 1) return true;
+		if(results.length >= 1) return true;
+	}catch{}
+	return false;
+}
+
+async function isPostIDTaken(username, postID){
+	try{
+		const { results } = await env.DB.prepare("SELECT username FROM posts WHERE username = ?1 AND id = ?2").bind(username, postID).all();
+		if(results.length >= 1) return true;
 	}catch{}
 	return false;
 }
@@ -422,11 +430,15 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1024, "info": "You need to have from 3 to 20 keywords. Keywords needs to be separated with comma and string can't be longer than 255 characters." });
 	}
 
+	if(await isPostIDTaken(data.username, data.id)){
+		return jsonResponse({ "error": 1025, "info": "Post ID is already taken. Please use another post ID." })
+	}
+
 	let read = Math.round(getWordCount(data.markdown) / 200);
 	try{
 		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, category, language, tag, keywords, created, read_time) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, date, read).run();
 	}catch(error){
-		return jsonResponse({ "error": 1025, "info": "Something went wrong while trying to store your post in the database." });
+		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to store your post in the database." });
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
