@@ -308,6 +308,8 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
 	}
 
+	await env.AKV.delete('token-' + username + '-' + hashedIP);
+
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
