@@ -13,8 +13,8 @@ CREATE TABLE creators (
 	social TEXT,
 	theme TEXT DEFAULT "light" NOT NULL,
 	advertisement TEXT,
-	created TEXT,
-	accessed TEXT
+	created TEXT NOT NULL,
+	accessed TEXT NOT NULL
 );
 
 CREATE TABLE posts (
