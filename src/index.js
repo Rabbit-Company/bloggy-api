@@ -571,6 +571,10 @@ router.post("/generatePages", async request => {
 	}
 	rPost = rPost.results;
 
+	let link = env.DOMAIN + "/creator/" + data.username;
+	let avatar = env.CDN + "/avatars/" + data.username + ".png";
+	let rssFeed = `<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel><title>${rUser.title}</title><link>${link}</link><description>${rUser.description}</description><lastBuildDate>${new Date().toUTCString()}</lastBuildDate><docs>https://validator.w3.org/feed/docs/rss2.html</docs><generator>https://github.com/jpmonette/feed</generator><language>${rUser.language}</language><image><title>${rUser.author}</title><url>${avatar}</url><link>${link}</link></image><copyright>${new Date().getFullYear()} ${rUser.author}, All rights reserved.</copyright><category>${rUser.category}</category>`;
+
 	for(let i = 0; i < rPost.length; i++){
 		let id = rPost[i].id;
 		let username = rPost[i].username;
@@ -584,6 +588,10 @@ router.post("/generatePages", async request => {
 		let keywords = rPost[i].keywords;
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
+
+		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
+
+		rssFeed += `<item><title><![CDATA[${title}]]></title><link>${fullPostURL}</link><guid>${fullPostURL}</guid><pubDate>${new Date(created).toUTCString()}</pubDate><description><![CDATA[${description}]]></description><author>${rUser.email} (${rUser.author})</author><enclosure url="${picture}" length="0" type="image/svg"/></item>`;
 
 		let avatar = env.CDN + "/avatars/" + username + ".png";
 		let twitter = rUser.social?.twitter || env.TWITTER;
@@ -609,7 +617,7 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::metaTwitterSite::", env.TWITTER.replace("https://twitter.com/", "@"));
 		tempTemplate = tempTemplate.replaceAll("::metaTwitterCreator::", twitter.replace("https://twitter.com/", "@"));
 		tempTemplate = tempTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + username + "/" + id);
-		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + env.DOMAIN + "/creator/" + username + "/" + id);
+		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + fullPostURL);
 		tempTemplate = tempTemplate.replaceAll("::analytics::", env.ANALYTICS);
 		tempTemplate = tempTemplate.replaceAll("::metaKeywords::", keywords);
 
@@ -630,8 +638,11 @@ router.post("/generatePages", async request => {
 		});
 
 		tempTemplate = tempTemplate.replaceAll("::post::", html);
-		return jsonResponse({"html": tempTemplate});
+		await setPageValue(`post_${username}_${id}`, tempTemplate);
 	}
+
+	rssFeed += "</channel></rss>";
+	await setPageValue("feed_rss_" + data.username, rssFeed);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
