@@ -105,6 +105,18 @@ function isPostPictureValid(picture){
 	return (picture.length >= 5 && picture.length <= 500);
 }
 
+function isPostTagValid(tag){
+	if(typeof(tag) !== 'string' || tag === null) return false;
+	return (tag.length >= 3 && tag.length <= 30);
+}
+
+function isPostkeywordsValid(keywords){
+	if(typeof(keywords) !== 'string' || keywords === null) return false;
+	if(keywords.length >= 255) return false;
+	keywords = keywords.split(',');
+	return (keywords.length >= 3 && keywords.length <= 20);
+}
+
 function isPostMarkdownValid(markdown){
 	if(typeof(markdown) !== 'string' || markdown === null) return false;
 	if(markdown.length > 100000) return false;
@@ -358,8 +370,8 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
 	}
 
-	if(!data.username || !data.token || !data.id || !data.title || !data.description || !data.picture || !data.markdown || !data.category || !data.language || !data.tag || !data.keywords || !data.date || !data.read){
-		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, id, title, description, picture, markdown, category, language, tag, keywords, date, read" });
+	if(!data.username || !data.token || !data.id || !data.title || !data.description || !data.picture || !data.markdown || !data.category || !data.language || !data.tag || !data.keywords){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, id, title, description, picture, markdown, category, language, tag, keywords" });
 	}
 
 	if(!isUsernameValid(data.username)){
@@ -379,19 +391,35 @@ router.post("/createPost", async request => {
 	}
 
 	if(!isPostTitleValid(data.title)){
-		return jsonResponse({ "error": 1019, "info": "Post Title needs to be between 5 and 100 characters long." });
+		return jsonResponse({ "error": 1019, "info": "Title needs to be between 5 and 100 characters long." });
 	}
 
 	if(!isPostDescriptionValid(data.description)){
-		return jsonResponse({ "error": 1020, "info": "Post Description needs to be between 30 and 300 characters long." });
+		return jsonResponse({ "error": 1020, "info": "Description needs to be between 30 and 300 characters long." });
 	}
 
 	if(!isPostPictureValid(data.picture)){
-		return jsonResponse({ "error": 1021, "info": "Post Picture needs to be between 5 and 500 characters long." });
+		return jsonResponse({ "error": 1021, "info": "Picture needs to be between 5 and 500 characters long." });
 	}
 
 	if(!isPostMarkdownValid(data.markdown)){
 		return jsonResponse({ "error": 1022, "info": "Post needs to be between 150 and 10000 words long." });
+	}
+
+	if(!isCategoryValid(data.category)){
+		return jsonResponse({ "error": 1012, "info": "Category is invalid." });
+	}
+
+	if(!isLanguageValid(data.language)){
+		return jsonResponse({ "error": 1013, "info": "Language is invalid. Please use ISO 639-1." });
+	}
+
+	if(!isPostTagValid(data.tag)){
+		return jsonResponse({ "error": 1023, "info": "Tag needs to be between 3 and 30 characters long." });
+	}
+
+	if(!isPostkeywordsValid(data.keywords)){
+		return jsonResponse({ "error": 1024, "info": "You need to have from 3 to 20 keywords. Keywords needs to be separated with comma and string can't be longer than 255 characters." });
 	}
 
 
