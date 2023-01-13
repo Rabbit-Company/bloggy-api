@@ -285,7 +285,7 @@ router.post("/login", async request => {
 
 	let password = await generateHash(data.password);
 	try{
-		const { results } = await env.DB.prepare("SELECT username, email, fa_secret, title, description, author, category, language, social, theme, advertisement, created, accessed FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
+		const { results } = await env.DB.prepare("SELECT * FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
 		if(results.length == 1){
 			let token = await forceGetToken(data.username);
 			let json = {
@@ -566,7 +566,7 @@ router.post("/generatePages", async request => {
 		let username = results[i].username;
 		let title = results[i].title;
 		let description = results[i].description;
-		let picture = (results[i].picture.startsWith('http')) ? results[i].picture : env.CDN + "/" + results[i].picture;
+		let picture = (results[i].picture.startsWith('http')) ? results[i].picture : CDN + "/" + results[i].picture;
 		let markdown = results[i].markdown;
 		let category = results[i].category;
 		let language = results[i].language;
