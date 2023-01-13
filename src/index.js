@@ -583,8 +583,7 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
-		let twitter = rUser.social?.twitter;
-		if(typeof(twitter) == 'undefined') twitter = env.TWITTER;
+		let twitter = rUser.social?.twitter || env.TWITTER;
 
 		let tempTemplate = templatePost;
 		tempTemplate = tempTemplate.replaceAll("::metatitle::", title);
@@ -609,6 +608,7 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + username + "/" + id);
 		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + env.DOMAIN + "/creator/" + username + "/" + id);
 		tempTemplate = tempTemplate.replaceAll("::analytics::", env.ANALYTICS);
+		tempTemplate = tempTemplate.replaceAll("::metaKeywords::", keywords);
 
 		return jsonResponse({"html": tempTemplate});
 	}
