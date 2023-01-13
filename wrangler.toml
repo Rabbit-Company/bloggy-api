@@ -2,6 +2,10 @@ name = "bloggy-api"
 main = "src/index.js"
 compatibility_date = "2023-01-12"
 
+[vars]
+DOMAIN = "https://test.bloggy.io"
+CDN = "https://cdn.bloggy.io"
+
 kv_namespaces = [
   { binding = "AKV", id = "854c863c76a548e491b1141a6dcd9439" },
 	{ binding = "PKV", id = "60f81627fcdb46f19064d93be33765b6" }

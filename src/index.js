@@ -562,7 +562,19 @@ router.post("/generatePages", async request => {
 	}
 
 	for(let i = 0; i < results.length; i++){
-
+		let id = results[i].id;
+		let username = results[i].username;
+		let title = results[i].title;
+		let description = results[i].description;
+		let picture = (results[i].picture.startsWith('http')) ? results[i].picture : env.CDN + "/" + results[i].picture;
+		let markdown = results[i].markdown;
+		let category = results[i].category;
+		let language = results[i].language;
+		let tag = results[i].tag;
+		let keywords = results[i].keywords;
+		let created = results[i].created;
+		let read_time = results[i].read_time;
+		return jsonResponse({"picture": picture});
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
