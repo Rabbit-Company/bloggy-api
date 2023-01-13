@@ -29,5 +29,5 @@ CREATE TABLE posts (
 	tag TEXT NOT NULL,
 	language TEXT NOT NULL,
 	date TEXT NOT NULL,
-	read TEXT NOT NULL
+	read INTEGER NOT NULL
 );
