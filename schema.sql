@@ -16,3 +16,18 @@ CREATE TABLE creators (
 	created TEXT,
 	accessed TEXT
 );
+
+CREATE TABLE posts (
+	id TEXT NOT NULL,
+	username TEXT NOT NULL,
+	title TEXT NOT NULL,
+	description TEXT NOT NULL,
+	picture TEXT NOT NULL,
+	markdown TEXT NOT NULL,
+	tag TEXT NOT NULL,
+	keywords TEXT NOT NULL,
+	date TEXT NOT NULL,
+	read TEXT NOT NULL,
+	category TEXT,
+	language TEXT
+);
