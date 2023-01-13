@@ -190,7 +190,7 @@ async function forceGetToken(username){
 
 async function isAuthorized(username, token){
 	let key = 'token-' + username + '-' + hashedIP;
-	let token2 = await getValue(key);
+	let token2 = await getValue(key, 60);
 	if(token2 === null) return false;
 	if(token === token2) return true;
 	return false;
