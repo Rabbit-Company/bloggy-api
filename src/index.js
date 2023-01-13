@@ -46,6 +46,11 @@ function isOTPValid(otp){
 	return (otp.length === 0 || otp.length === 6 || otp.length === 44);
 }
 
+function isTokenValid(token){
+	if(typeof(token) !== 'string' || token === null) return false;
+	return token.length === 128;
+}
+
 function isTitleValid(title){
 	if(typeof(title) !== 'string' || title === null) return false;
 	return (title.length >= 3 && title.length <= 30);
@@ -133,6 +138,14 @@ async function forceGetToken(username){
 	}
 
 	return token;
+}
+
+async function isAuthorized(username, token){
+	let key = 'token-' + username + '-' + hashedIP;
+	let token2 = await getValue(key);
+	if(token2 === null) return false;
+	if(token === token2) return true;
+	return false;
 }
 
 async function isUsernameTaken(username){
@@ -281,6 +294,21 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
 	}
 
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!isAuthorized(data.username, data.token)){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		await env.DB.prepare("DELETE FROM creators WHERE username = ?").bind(data.username).run();
+	}catch(error){
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
+	}
+
+	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
 router.all("*", () => {
