@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang='::language::'>
+	<head>
+		<meta charset='UTF-8' />
+		<meta name='viewport' content='width=device-width, initial-scale=1' />
+		<title>::metatitle::</title>
+		<meta name='author' content='::metaAuthor::' />
+		<meta name='description' content='::metaDescription::' />
+		<meta name='keywords' content='::metaKeywords::' />
+		<meta name='theme-color' content='#FFFFFF' />
+		<meta property='og:title' content='::metatitle::' />
+		<meta property='og:description' content='::metaDescription::' />
+		<meta property='og:url' content='::metaURL::' />
+		<meta property='og:image' content='::metaImage::' />
+		<meta property='og:site_name' content='::siteName::' />
+		<meta property='og:type' content='article' />
+		<meta property='article:published_time' content='::metaPublishedTime::' />
+		<meta property='article:modified_time' content='::metaModifiedTime::' />
+		<meta property='article:author' content='::metaAuthor::' />
+		<meta property='article:section' content='::metaCategory::' />
+		<meta property='article:tag' content='::metaTag::' />
+		<meta name='twitter:title' content='::metatitle::' />
+		<meta name='twitter:description' content='::metaDescription::' />
+		<meta name='twitter:creator' content='::metaTwitterCreator::' />
+		<meta name='twitter:site' content='::metaTwitterSite::' />
+		<meta name='twitter:domain' content='::metaDomain::' />
+		<meta name='twitter:image' content='::metaImage::' />
+		<meta name='twitter:card' content='summary_large_image' />
+		<link rel='icon' href='::icon::' type='image/png' />
+		<link rel='alternate' type='application/rss+xml' title='Subscribe' href='::metaRSS::' />
+		<link rel='canonical' href='::metaURL::' />
+		<link rel='manifest' href='/manifest.json' />
+		<link type='text/css' rel='stylesheet' href='/css/tailwind.min.css' />
+		<link type='text/css' rel='stylesheet' href='/css/index.css' />
+		<link type='text/css' rel='stylesheet' href='/css/markdown.css' />
+		<link type='text/css' rel='stylesheet' href='/css/default.min.css' />
+		::analytics::
+		<script type='application/ld+json'>
+			::jsondl::
+		</script>
+	</head>
+	<body class='bg-gray-50'>
+		<div class='relative bg-gray-50 px-6 pt-8 pb-8 lg:px-8 lg:pt-16 lg:pb-16'>
+			<div class='absolute inset-0'>
+				<div class='h-1/3 bg-gray-50 sm:h-2/3'></div>
+			</div>
+			<div class='relative mx-auto max-w-7xl'>
+				<div class='text-center'>
+					<a href='::previousLocation::'><h2 id='title' class='text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>::title::</h2></a>
+					<p id='description' class='mx-auto mt-3 max-w-2xl text-xl text-gray-500 sm:mt-4'>::description::</p>
+					<div id='social-media' class='mt-2 flex justify-center space-x-6 max-w-7xl mx-auto'>::social::</div>
+				</div>
+				<div id='post' class='markdown max-w-4xl mx-auto'>
+					::post::
+				</div>
+				<div class='max-w-4xl mx-auto'>
+					<a href='https://twitter.com/intent/tweet?text=::shareTwitter::' target='_blank' class='inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none'>
+						<svg class='-ml-1 mr-3 h-5 w-5' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+							<path stroke='none' d='M0 0h24v24H0z' fill='none'></path>
+							<path d='M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z'></path>
+						</svg>
+						Share on Twitter
+					</a>
+				</div>
+			</div>
+		</div>
+		<script src='/js/default-functions.js'></script>
+	</body>
+</html>
