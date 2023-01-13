@@ -29,5 +29,5 @@ CREATE TABLE posts (
 	tag TEXT NOT NULL,
 	keywords TEXT NOT NULL,
 	created TEXT NOT NULL,
-	read INTEGER NOT NULL
+	read_time INTEGER NOT NULL
 );
