@@ -390,10 +390,6 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
 	}
 
-	if(!(await isAuthorized(data.username, data.token))){
-		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
-	}
-
 	if(!isPostIDValid(data.id)){
 		return jsonResponse({ "error": 1018, "info": "Post ID can only contain lower case characters, numbers and hypens. It also need to be between 5 and 100 characters long." });
 	}
@@ -430,6 +426,10 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1024, "info": "You need to have from 3 to 20 keywords. Keywords needs to be separated with comma and string can't be longer than 255 characters." });
 	}
 
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
 	if(await isPostIDTaken(data.username, data.id)){
 		return jsonResponse({ "error": 1025, "info": "Post ID is already taken. Please use another post ID." })
 	}
@@ -439,6 +439,44 @@ router.post("/createPost", async request => {
 		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, category, language, tag, keywords, created, read_time) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, date, read).run();
 	}catch(error){
 		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to store your post in the database." });
+	}
+
+	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
+router.post("/deletePost", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token || !data.id){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, id" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!isPostIDValid(data.id)){
+		return jsonResponse({ "error": 1018, "info": "Post ID can only contain lower case characters, numbers and hypens. It also need to be between 5 and 100 characters long." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		await env.DB.prepare("DELETE FROM posts WHERE username = ?1 AND id = ?2").bind(data.username, data.id).run();
+	}catch(error){
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your post. Please try again later." });
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
