@@ -303,7 +303,7 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
 	}
 
-	if(!isAuthorized(data.username, data.token)){
+	if(!(await isAuthorized(data.username, data.token))){
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
