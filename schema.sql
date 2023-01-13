@@ -24,9 +24,9 @@ CREATE TABLE posts (
 	description TEXT NOT NULL,
 	picture TEXT NOT NULL,
 	markdown TEXT NOT NULL,
-	tag TEXT NOT NULL,
 	keywords TEXT NOT NULL,
 	category TEXT NOT NULL,
+	tag TEXT NOT NULL,
 	language TEXT NOT NULL,
 	date TEXT NOT NULL,
 	read TEXT NOT NULL
