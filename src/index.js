@@ -633,6 +633,7 @@ router.post("/generatePages", async request => {
 		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' loading='lazy' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
 
 		html += marked.parse(markdown, {
+			gfm: true,
 			breaks: true,
 			sanitizer: DOMPurify.sanitize
 		});
