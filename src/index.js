@@ -145,15 +145,19 @@ async function generateHash(message){
 	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function setValue(key, value, expirationTime = 86400, cacheTime = 600){
+async function setValue(key, value, expirationTime = null, cacheTime = 60){
 	let cacheKey = request.url + "?key=" + key;
-	await env.AKV.put(key, value, { expirationTtl: expirationTime });
+	if(expirationTime === null){
+		await env.AKV.put(key, value);
+	}else{
+		await env.AKV.put(key, value, { expirationTtl: expirationTime });
+	}
 	let nres = new Response(value);
 	nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
 	await cache.put(cacheKey, nres);
 }
 
-async function getValue(key, cacheTime = 600){
+async function getValue(key, cacheTime = 60){
 	let value = null;
 
 	let cacheKey = request.url + "?key=" + key;
@@ -182,7 +186,7 @@ async function forceGetToken(username){
 	token = await getValue(key);
 	if(token == null){
 		token = await generateHash(generateCodes());
-		await setValue(key, token);
+		await setValue(key, token, 86400);
 	}
 
 	return token;
@@ -190,7 +194,7 @@ async function forceGetToken(username){
 
 async function isAuthorized(username, token){
 	let key = 'token-' + username + '-' + hashedIP;
-	let token2 = await getValue(key, 60);
+	let token2 = await getValue(key);
 	if(token2 === null) return false;
 	if(token === token2) return true;
 	return false;
