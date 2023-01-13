@@ -61,7 +61,7 @@ async function generateHash(message){
 
 async function setValue(key, value, expirationTime = 86400, cacheTime = 600){
 	let cacheKey = request.url + "?key=" + key;
-	await env.KV.put(key, value, { expirationTtl: expirationTime });
+	await env.AKV.put(key, value, { expirationTtl: expirationTime });
 	let nres = new Response(value);
 	nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
 	await cache.put(cacheKey, nres);
@@ -75,7 +75,7 @@ async function getValue(key, cacheTime = 600){
 	if(res) value = await res.text();
 
 	if(value == null){
-		value = await env.KV.get(key, { cacheTtl: cacheTime });
+		value = await env.AKV.get(key, { cacheTtl: cacheTime });
 		let nres = new Response(value);
 		nres.headers.append('Cache-Control', 's-maxage=' + cacheTime);
 		if(value != null) await cache.put(cacheKey, nres);
