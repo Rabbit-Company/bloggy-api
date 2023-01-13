@@ -138,6 +138,7 @@ async function forceGetToken(username){
 async function isUsernameTaken(username){
 	try{
 		const { results } = await env.DB.prepare("SELECT username FROM creators WHERE username = ?").bind(username).all();
+		return false;
 		if(results.length == 1) return true;
 	}catch{}
 	return false;
