@@ -7,6 +7,8 @@ let request;
 let env;
 let ctx;
 let hashedIP;
+let categories = ['Art and Design', 'Book and Writing', 'Business', 'Car', 'DIY Craft', 'Fashion and Beauty', 'Finance', 'Food', 'Gaming', 'Health and Fitness', 'Lifestyle', 'Movie', 'Music', 'News', 'Parenting', 'Personal', 'Pet', 'Political', 'Religion', 'Review', 'Sports', 'Technology', 'Travel'];
+let languages = ['ab','aa','af','ak','sq','am','ar','an','hy','as','av','ae','ay','az','bm','ba','eu','be','bn','bh','bi','bs','br','bg','my','ca','km','ch','ce','ny','zh','cu','cv','kw','co','cr','hr','cs','da','dv','nl','dz','en','eo','et','ee','fo','fj','fi','fr','ff','gd','gl','lg','ka','de','ki','el','kl','gn','gu','ht','ha','he','hz','hi','ho','hu','is','io','ig','id','ia','ie','iu','ik','ga','it','ja','jv','kn','kr','ks','kk','rw','kv','kg','ko','kj','ku','ky','lo','la','lv','lb','li','ln','lt','lu','mk','mg','ms','ml','mt','gv','mi','mr','mh','ro','mn','na','nv','nd','ng','ne','se','no','nb','nn','ii','oc','oj','or','om','os','pi','pa','ps','fa','pl','pt','qu','rm','rn','ru','sm','sg','sa','sc','sr','sn','sd','si','sk','sl','so','st','nr','es','su','sw','ss','sv','tl','ty','tg','ta','tt','te','th','bo','ti','to','ts','tn','tr','tk','tw','ug','uk','ur','uz','ve','vi','vo','wa','cy','fy','wo','xh','yi','yo','za','zu'];
 
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
@@ -48,6 +50,14 @@ function isDescriptionValid(description){
 
 function isAuthorValid(author){
 	return (author.length >= 5 && author.length <= 30);
+}
+
+function isCategoryValid(category){
+	return categories.includes(category);
+}
+
+function isLanguageValid(language){
+	return languages.includes(language);
 }
 
 function generateNonce(){
@@ -178,8 +188,8 @@ router.post("/register", async request => {
 		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
 	}
 
-	if(!data.username || !data.password || !data.email || !data.title || !data.description || !data.author){
-		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email, title, description, author" });
+	if(!data.username || !data.password || !data.email || !data.title || !data.description || !data.author || !data.category || !data.language){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, password, email, title, description, author, category, language" });
 	}
 
 	if(!isUsernameValid(data.username)){
@@ -206,9 +216,17 @@ router.post("/register", async request => {
 		return jsonResponse({ "error": 1011, "info": "Author needs to be between 5 and 30 characters long." });
 	}
 
+	if(!isCategoryValid(data.category)){
+		return jsonResponse({ "error": 1012, "info": "Category is invalid." });
+	}
+
+	if(!isLanguageValid(data.language)){
+		return jsonResponse({ "error": 1013, "info": "Language is invalid. Please use ISO 639-1." });
+	}
+
 	let password = await generateHash(data.password);
 	try{
-		await env.DB.prepare("INSERT INTO creators(username, password, email, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5)").bind(data.username, password, data.email, date, date).run();
+		await env.DB.prepare("INSERT INTO creators(username, password, email, title, description, author, category, language, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)").bind(data.username, password, data.email, data.title, data.description, data.author, data.category, data.language, date, date).run();
 	}catch(error){
 		return jsonResponse({ "error": 1005, "info": "Username is already registered." });
 	}
