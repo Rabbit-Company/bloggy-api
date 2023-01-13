@@ -138,7 +138,6 @@ async function forceGetToken(username){
 async function isUsernameTaken(username){
 	try{
 		const { results } = await env.DB.prepare("SELECT username FROM creators WHERE username = ?").bind(username).all();
-		return false;
 		if(results.length == 1) return true;
 	}catch{}
 	return false;
@@ -175,16 +174,25 @@ router.post("/login", async request => {
 
 	let password = await generateHash(data.password);
 	try{
-		const { results } = await env.DB.prepare("SELECT username, created, accessed FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
-		return jsonResponse(JSON.stringify(request));
+		const { results } = await env.DB.prepare("SELECT username, email, fa_secret, title, description, author, category, language, social, theme, advertisement, created, accessed FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
 		if(results.length == 1){
 			let token = await forceGetToken(data.username);
 			let json = {
 				"token": token,
 				"username": results[0].username,
+				"email": results[0].email,
+				"title": results[0].title,
+				"description": results[0].description,
+				"author": results[0].author,
+				"category": results[0].category,
+				"language": results[0].language,
+				"social": results[0].social,
+				"theme": results[0].theme,
+				"advertisement": results[0].advertisement,
 				"accessed": results[0].accessed,
 				"created": results[0].created
 			};
+			json.fa_enabled = (results[0].fa_secret !== null);
 			try{
 				if(results[0].accessed != date) await env.DB.prepare("UPDATE creators SET accessed = ?1 WHERE username = ?2").bind(date, data.username).run();
 			}catch{}
@@ -287,7 +295,6 @@ export default {
 		date = new Date().toISOString().split('T')[0];
 		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
-		return new Response("Test");
 		return router.handle(request2);
 	},
 };
