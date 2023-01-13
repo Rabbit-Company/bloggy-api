@@ -473,6 +473,10 @@ router.post("/deletePost", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
+	if(!(await isPostIDTaken(data.username, data.id))){
+		return jsonResponse({ "error": 1027, "info": "This post doesn't exists." })
+	}
+
 	try{
 		await env.DB.prepare("DELETE FROM posts WHERE username = ?1 AND id = ?2").bind(data.username, data.id).run();
 	}catch(error){
