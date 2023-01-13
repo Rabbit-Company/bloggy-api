@@ -27,42 +27,52 @@ function getRandomInt(max, min = 0) {
 }
 
 function isUsernameValid(username){
+	if(typeof(username) !== 'string' || username === null) return false;
 	return /^([a-z][a-z0-9\-]{3,29})$/.test(username);
 }
 
 function isPasswordValid(password){
+	if(typeof(password) !== 'string' || password === null) return false;
 	return /^([a-z0-9]{128})$/.test(password);
 }
 
 function isEmailValid(email){
+	if(typeof(email) !== 'string' || email === null) return false;
 	return /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email);
 }
 
 function isOTPValid(otp){
+	if(typeof(otp) !== 'string' || otp === null) return false;
 	return (otp.length === 0 || otp.length === 6 || otp.length === 44);
 }
 
 function isTitleValid(title){
+	if(typeof(title) !== 'string' || title === null) return false;
 	return (title.length >= 3 && title.length <= 30);
 }
 
 function isDescriptionValid(description){
+	if(typeof(description) !== 'string' || description === null) return false;
 	return (description.length >= 30 && description.length <= 160);
 }
 
 function isAuthorValid(author){
+	if(typeof(author) !== 'string' || author === null) return false;
 	return (author.length >= 5 && author.length <= 30);
 }
 
 function isCategoryValid(category){
+	if(typeof(category) !== 'string' || category === null) return false;
 	return categories.includes(category);
 }
 
 function isLanguageValid(language){
+	if(typeof(language) !== 'string' || language === null) return false;
 	return languages.includes(language);
 }
 
 function isThemeValid(theme){
+	if(typeof(theme) !== 'string' || theme === null) return false;
 	return themes.includes(theme);
 }
 
