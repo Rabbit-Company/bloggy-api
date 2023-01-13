@@ -165,6 +165,7 @@ router.post("/login", async request => {
 	let password = await generateHash(data.password);
 	try{
 		const { results } = await env.DB.prepare("SELECT username, created, accessed FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
+		return jsonResponse(JSON.stringify(request));
 		if(results.length == 1){
 			let token = await forceGetToken(data.username);
 			let json = {
