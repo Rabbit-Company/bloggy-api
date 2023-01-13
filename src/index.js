@@ -286,6 +286,7 @@ export default {
 		date = new Date().toISOString().split('T')[0];
 		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
+		return new Response("Test");
 		return router.handle(request2);
 	},
 };
