@@ -10,6 +10,8 @@
 		"deploy": "wrangler publish"
 	},
 	"dependencies": {
-		"itty-router": "^3.0.11"
+		"dompurify": "^2.4.3",
+		"itty-router": "^3.0.11",
+		"marked": "^4.2.5"
 	}
 }

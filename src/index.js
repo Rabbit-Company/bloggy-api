@@ -1,4 +1,6 @@
 import { Router } from 'itty-router';
+import * as DOMPurify from 'dompurify';
+import { marked } from 'marked';
 const router = Router();
 
 const cache = caches.default;
@@ -367,7 +369,7 @@ router.post("/register", async request => {
 
 	let password = await generateHash(data.password);
 	try{
-		await env.DB.prepare("INSERT INTO creators(username, password, email, title, description, author, category, language, theme, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)").bind(data.username, password, data.email, data.title, data.description, data.author, data.category, data.language, data.theme, date, date).run();
+		await env.DB.prepare("INSERT INTO creators(username, password, email, title, description, author, category, language, theme, created, accessed) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)").bind(data.username, password, data.email, DOMPurify.sanitize(data.title), DOMPurify.sanitize(data.description), DOMPurify.sanitize(data.author), data.category, data.language, data.theme, date, date).run();
 	}catch(error){
 		return jsonResponse({ "error": 1005, "info": "Username is already registered." });
 	}
@@ -621,6 +623,8 @@ router.post("/generatePages", async request => {
 		let html = "<h1 class='post-title'>" + title + "</h1>";
 		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + created + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
 		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' loading='lazy' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
+
+		html += DOMPurify.sanitize(marked.parse(markdown));
 
 		tempTemplate = tempTemplate.replaceAll("::post::", html);
 		return jsonResponse({"html": tempTemplate});
