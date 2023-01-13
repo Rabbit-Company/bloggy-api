@@ -553,28 +553,40 @@ router.post("/generatePages", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
-	let results = {};
-
+	let rUser = {};
 	try{
-		results = await env.DB.prepare("SELECT * FROM posts WHERE username = ?").bind(data.username).all();
+		rUser = await env.DB.prepare("SELECT * FROM creators WHERE username = ?").bind(data.username).all();
+	}catch{
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch user data. Please try again later." });
+	}
+	rUser = rUser.results;
+
+	let rPost = {};
+	try{
+		rPost = await env.DB.prepare("SELECT * FROM posts WHERE username = ?").bind(data.username).all();
 	}catch{
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch all posts. Please try again later." });
 	}
+	rPost = rPost.results;
 
-	for(let i = 0; i < results.length; i++){
-		let id = results[i].id;
-		let username = results[i].username;
-		let title = results[i].title;
-		let description = results[i].description;
-		let picture = (results[i].picture.startsWith('http')) ? results[i].picture : CDN + "/" + results[i].picture;
-		let markdown = results[i].markdown;
-		let category = results[i].category;
-		let language = results[i].language;
-		let tag = results[i].tag;
-		let keywords = results[i].keywords;
-		let created = results[i].created;
-		let read_time = results[i].read_time;
-		return jsonResponse({"picture": picture});
+	for(let i = 0; i < rPost.length; i++){
+		let id = rPost[i].id;
+		let username = rPost[i].username;
+		let title = rPost[i].title;
+		let description = rPost[i].description;
+		let picture = (rPost[i].picture.startsWith('http')) ? rPost[i].picture : env.CDN + "/posts/" + username + "/" + rPost[i].picture;
+		let markdown = rPost[i].markdown;
+		let category = rPost[i].category;
+		let language = rPost[i].language;
+		let tag = rPost[i].tag;
+		let keywords = rPost[i].keywords;
+		let created = rPost[i].created;
+		let read_time = rPost[i].read_time;
+
+		let tempTemplate = templatePost;
+		tempTemplate = tempTemplate.replaceAll("::metatitle::", title);
+
+		return jsonResponse({"picture": picture, "html": tempTemplate});
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
