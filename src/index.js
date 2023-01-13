@@ -583,6 +583,9 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
+		let twitter = rUser.social?.twitter;
+		if(typeof(twitter) == 'undefined') twitter = env.TWITTER;
+
 		let tempTemplate = templatePost;
 		tempTemplate = tempTemplate.replaceAll("::metatitle::", title);
 		tempTemplate = tempTemplate.replaceAll("::metaDescription::", description);
@@ -602,8 +605,12 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
 		tempTemplate = tempTemplate.replaceAll("::metaRSS::", env.DOMAIN + "/creator/" + username + "/feed.rss");
 		tempTemplate = tempTemplate.replaceAll("::metaTwitterSite::", env.TWITTER.replace("https://twitter.com/", "@"));
+		tempTemplate = tempTemplate.replaceAll("::metaTwitterCreator::", twitter.replace("https://twitter.com/", "@"));
+		tempTemplate = tempTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + username + "/" + id);
+		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + env.DOMAIN + "/creator/" + username + "/" + id);
+		tempTemplate = tempTemplate.replaceAll("::analytics::", env.ANALYTICS);
 
-		return jsonResponse({"picture": picture, "html": tempTemplate});
+		return jsonResponse({"html": tempTemplate});
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
