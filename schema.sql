@@ -28,6 +28,6 @@ CREATE TABLE posts (
 	category TEXT NOT NULL,
 	tag TEXT NOT NULL,
 	language TEXT NOT NULL,
-	date TEXT NOT NULL,
+	created TEXT NOT NULL,
 	read INTEGER NOT NULL
 );

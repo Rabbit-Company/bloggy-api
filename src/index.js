@@ -424,7 +424,7 @@ router.post("/createPost", async request => {
 
 	let read = Math.round(getWordCount(data.markdown) / 200);
 	try{
-		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, keywords, category, tag, language, date, read) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11 ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.keywords, data.category, data.tag, data.language, date, read).run();
+		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, keywords, category, tag, language, created, read) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11 ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.keywords, data.category, data.tag, data.language, date, read).run();
 	}catch(error){
 		return jsonResponse({ "error": 1025, "info": "Something went wrong while trying to store your post in the database." });
 	}
