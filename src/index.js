@@ -127,6 +127,11 @@ async function getValue(key, cacheTime = 600){
 	return value;
 }
 
+async function deleteValue(key){
+	await env.AKV.delete(key);
+	await cache.delete(request.url + "?key=" + key);
+}
+
 async function forceGetToken(username){
 	let token = null;
 	let key = 'token-' + username + '-' + hashedIP;
@@ -308,7 +313,7 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
 	}
 
-	await env.AKV.delete('token-' + username + '-' + hashedIP);
+	await deleteValue('token-' + data.username + '-' + hashedIP);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
