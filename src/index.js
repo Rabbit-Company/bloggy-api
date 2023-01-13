@@ -5,7 +5,6 @@ const cache = caches.default;
 let date;
 let request;
 let env;
-let ctx;
 let hashedIP;
 
 const themes = ['light'];
@@ -529,10 +528,9 @@ router.all("*", () => {
 });
 
 export default {
-	async fetch(request2, env2, ctx2){
+	async fetch(request2, env2){
 		request = request2;
 		env = env2;
-		ctx = ctx2;
 		date = new Date().toISOString().split('T')[0];
 		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
