@@ -26,6 +26,10 @@ function getRandomInt(max, min = 0) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
+function getWordCount(str) {
+	return str.trim().split(/\s+/).length;
+}
+
 function isUsernameValid(username){
 	if(typeof(username) !== 'string' || username === null) return false;
 	return /^([a-z][a-z0-9\-]{3,29})$/.test(username);
@@ -89,6 +93,23 @@ function isPostIDValid(id){
 function isPostTitleValid(title){
 	if(typeof(title) !== 'string' || title === null) return false;
 	return (title.length >= 5 && title.length <= 100);
+}
+
+function isPostDescriptionValid(description){
+	if(typeof(description) !== 'string' || description === null) return false;
+	return (description.length >= 30 && description.length <= 300);
+}
+
+function isPostPictureValid(picture){
+	if(typeof(picture) !== 'string' || picture === null) return false;
+	return (picture.length >= 5 && picture.length <= 500);
+}
+
+function isPostMarkdownValid(markdown){
+	if(typeof(markdown) !== 'string' || markdown === null) return false;
+	if(markdown.length > 50000) return false;
+	let words = getWordCount(markdown);
+	return (words >= 150 && words <= 5000);
 }
 
 function generateNonce(){
@@ -359,6 +380,18 @@ router.post("/createPost", async request => {
 
 	if(!isPostTitleValid(data.title)){
 		return jsonResponse({ "error": 1019, "info": "Post Title needs to be between 5 and 100 characters long." });
+	}
+
+	if(!isPostDescriptionValid(data.description)){
+		return jsonResponse({ "error": 1020, "info": "Post Description needs to be between 30 and 300 characters long." });
+	}
+
+	if(!isPostPictureValid(data.picture)){
+		return jsonResponse({ "error": 1021, "info": "Post Picture needs to be between 5 and 500 characters long." });
+	}
+
+	if(!isPostMarkdownValid(data.markdown)){
+		return jsonResponse({ "error": 1022, "info": "Post needs to be between 150 and 5000 words long." });
 	}
 
 
