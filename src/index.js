@@ -107,9 +107,9 @@ function isPostPictureValid(picture){
 
 function isPostMarkdownValid(markdown){
 	if(typeof(markdown) !== 'string' || markdown === null) return false;
-	if(markdown.length > 50000) return false;
+	if(markdown.length > 100000) return false;
 	let words = getWordCount(markdown);
-	return (words >= 150 && words <= 5000);
+	return (words >= 150 && words <= 10000);
 }
 
 function generateNonce(){
@@ -391,7 +391,7 @@ router.post("/createPost", async request => {
 	}
 
 	if(!isPostMarkdownValid(data.markdown)){
-		return jsonResponse({ "error": 1022, "info": "Post needs to be between 150 and 5000 words long." });
+		return jsonResponse({ "error": 1022, "info": "Post needs to be between 150 and 10000 words long." });
 	}
 
 
