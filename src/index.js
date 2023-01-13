@@ -559,7 +559,7 @@ router.post("/generatePages", async request => {
 	}catch{
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch user data. Please try again later." });
 	}
-	rUser = rUser.results;
+	rUser = rUser.results[0];
 
 	let rPost = {};
 	try{
@@ -595,6 +595,13 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::metaImage::", picture);
 		tempTemplate = tempTemplate.replaceAll("::title::", rUser.title);
 		tempTemplate = tempTemplate.replaceAll("::description::", rUser.description);
+		tempTemplate = tempTemplate.replaceAll("::siteName::", env.TITLE);
+		tempTemplate = tempTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + username + ".png");
+		tempTemplate = tempTemplate.replaceAll("::username::", username);
+		tempTemplate = tempTemplate.replaceAll("::previousLocation::", "/creator/" + username);
+		tempTemplate = tempTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
+		tempTemplate = tempTemplate.replaceAll("::metaRSS::", env.DOMAIN + "/creator/" + username + "/feed.rss");
+		tempTemplate = tempTemplate.replaceAll("::metaTwitterSite::", env.TWITTER.replace("https://twitter.com/", "@"));
 
 		return jsonResponse({"picture": picture, "html": tempTemplate});
 	}
