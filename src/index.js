@@ -81,6 +81,16 @@ function isThemeValid(theme){
 	return themes.includes(theme);
 }
 
+function isPostIDValid(id){
+	if(typeof(id) !== 'string' || id === null) return false;
+	return /^([a-z][a-z0-9\-]{4,100})$/.test(id);
+}
+
+function isPostTitleValid(title){
+	if(typeof(title) !== 'string' || title === null) return false;
+	return (title.length >= 5 && title.length <= 100);
+}
+
 function generateNonce(){
 	let nonce = "";
 	for(let i = 0; i < 5; i++) nonce += getRandomInt(999999, 100000) + 'p';
@@ -327,8 +337,8 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
 	}
 
-	if(!data.username || !data.token){
-		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
+	if(!data.username || !data.token || !data.id || !data.title || !data.description || !data.picture || !data.markdown || !data.category || !data.language || !data.tag || !data.keywords || !data.date || !data.read){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, id, title, description, picture, markdown, category, language, tag, keywords, date, read" });
 	}
 
 	if(!isUsernameValid(data.username)){
@@ -343,6 +353,13 @@ router.post("/createPost", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
+	if(!isPostIDValid(data.id)){
+		return jsonResponse({ "error": 1018, "info": "Post ID can only contain lower case characters, numbers and hypens. It also need to be between 5 and 100 characters long." });
+	}
+
+	if(!isPostTitleValid(data.title)){
+		return jsonResponse({ "error": 1019, "info": "Post Title needs to be between 5 and 100 characters long." });
+	}
 
 
 	return jsonResponse({ "error": 0, "info": "Success" });
