@@ -26,3 +26,5 @@ DISCORD = "https://discord.rabbit-company.com"
 TWITTER = "https://twitter.com/RabbitCompany66"
 GITHUB = "https://github.com/Rabbit-Company"
 EMAIL = "info@rabbit-company.com"
+# Token to access Admin protected API endpoints
+TOKEN = "Your Sercret Token Here"
