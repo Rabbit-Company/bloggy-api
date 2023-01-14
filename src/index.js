@@ -569,6 +569,14 @@ router.post("/generateMainPage", async request => {
 	}
 	rUsers = rUsers.results;
 
+	let rPosts = {};
+	try{
+		rPosts = await env.DB.prepare("SELECT id, username FROM posts").all();
+	}catch{
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch posts. Please try again later." });
+	}
+	rPosts = rPosts.results;
+
 	let creators = {};
 	for(let i = 0; i < rUsers.length; i++){
 		let username = rUsers[i].username;
@@ -626,6 +634,16 @@ router.post("/generateMainPage", async request => {
 	await setPageValue('main', tempTemplate);
 
 	// Site Map
+	let siteMap = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"><url><loc>${env.DOMAIN}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`;
+	for(let i = 0; i < rUsers.length; i++){
+		siteMap += `<url><loc>${env.DOMAIN}/creator/${rUsers[i].username}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`;
+	}
+
+	for(let i = 0; i < rPosts.length; i++){
+		siteMap += `<url><loc>${env.DOMAIN}/creator/${rPosts[i].username}/${rPosts[i].id}</loc><changefreq>daily</changefreq><priority>0.7</priority></url>`;
+	}
+	siteMap += "</urlset>";
+	await setPageValue('sitemap', siteMap);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
