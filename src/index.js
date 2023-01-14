@@ -16,7 +16,7 @@ const languages = ['ab','aa','af','ak','sq','am','ar','an','hy','as','av','ae','
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
 	return new Response(json, {
-		headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+		headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS', 'Access-Control-Max-Age': '86400' },
 		status: statusCode
 	});
 }
