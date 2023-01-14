@@ -530,7 +530,7 @@ router.post("/deletePost", async request => {
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
-router.post("/generateMainPages", async request => {
+router.post("/generateMainPage", async request => {
 	let data = {};
 
 	try{
@@ -543,7 +543,7 @@ router.post("/generateMainPages", async request => {
 		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
 	}
 
-	if(data.username !== "admin" && data.token !== env.TOKEN){
+	if(data.username !== "admin" || data.token !== env.TOKEN){
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
@@ -561,11 +561,31 @@ router.post("/generateMainPages", async request => {
 	let manifest = `{"name":"${env.TITLE}","short_name":"${env.TITLE}","id":"/","start_url":"/","scope":".","description":"${env.DESCRIPTION}","categories":["entertainment","news","social"],"icons":[{"src":"images/icons/icon-48x48.png","sizes":"48x48","type":"image/png"},{"src":"images/icons/icon-72x72.png","sizes":"72x72","type":"image/png"},{"src":"images/icons/icon-96x96.png","sizes":"96x96","type":"image/png"},{"src":"images/icons/icon-128x128.png","sizes":"128x128","type":"image/png"},{"src":"images/icons/icon-144x144.png","sizes":"144x144","type":"image/png"},{"src":"images/icons/icon-152x152.png","sizes":"152x152","type":"image/png"},{"src":"images/icons/icon-192x192.png","sizes":"192x192","type":"image/png"},{"src":"images/icons/icon-384x384.png","sizes":"384x384","type":"image/png"},{"src":"images/icons/icon-512x512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"images/icons/icon-512x512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}],"screenshots":[{"src":"/images/screenshots/1.jpeg","sizes":"720x1600","type":"image/jpg"},{"src":"/images/screenshots/2.jpeg","sizes":"720x1600","type":"image/jpg"},{"src":"/images/screenshots/3.jpeg","sizes":"720x1600","type":"image/jpg"}],"theme_color":"#0D1117","background_color":"#0D1117","display":"standalone","orientation":"portrait","related_applications":[],"dir":"ltr","lang":"${env.LANGUAGE}"}`;
 	await setPageValue('manifest', manifest);
 
-	let creators = [];
+	let rUsers = {};
+	try{
+		rUsers = await env.DB.prepare("SELECT username, author, category, language FROM creators ORDER BY accessed DESC").all();
+	}catch{
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch users. Please try again later." });
+	}
+	rUsers = rUsers.results;
+
+	let creators = {};
+	for(let i = 0; i < rUsers.length; i++){
+		let username = rUsers[i].username;
+		creators[username] = {};
+		creators[username].title = rUsers[i].title;
+		creators[username].author = rUsers[i].author;
+		creators[username].category = rUsers[i].category;
+		creators[username].language = rUsers[i].language;
+	}
+
 	// Metadata
-	let metadata = `var DOMAIN = "${env.DOMAIN}";var CDN = "${env.CDN}";`;
+	let metadata = `var DOMAIN = "${env.DOMAIN}";var CDN = "${env.CDN}";var CREATORS = ${JSON.stringify(creators)};`;
+	await setPageValue('metadata', metadata);
 
 	// Site Map
+
+	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
 router.post("/generatePages", async request => {
