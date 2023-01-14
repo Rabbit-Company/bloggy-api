@@ -574,6 +574,7 @@ router.post("/generatePages", async request => {
 	let link = env.DOMAIN + "/creator/" + data.username;
 	let avatar = env.CDN + "/avatars/" + data.username + ".png";
 	let rssFeed = `<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel><title>${rUser.title}</title><link>${link}</link><description>${rUser.description}</description><lastBuildDate>${new Date().toUTCString()}</lastBuildDate><docs>https://validator.w3.org/feed/docs/rss2.html</docs><generator>https://github.com/jpmonette/feed</generator><language>${rUser.language}</language><image><title>${rUser.author}</title><url>${avatar}</url><link>${link}</link></image><copyright>${new Date().getFullYear()} ${rUser.author}, All rights reserved.</copyright><category>${rUser.category}</category>`;
+	let atomFeed = `<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><id>${link}</id><title>${rUser.title}</title><updated>${new Date().toISOString()}</updated><generator>https://github.com/jpmonette/feed</generator><author><name>${rUser.author}</name><email>${rUser.email}</email><uri>${link}</uri></author><link rel="alternate" href="${link}"/><link rel="self" href="${link}/feed.atom"/><subtitle>${rUser.description}</subtitle><logo>${avatar}</logo><icon>${avatar}</icon><rights>${new Date().getFullYear()} ${rUser.author}, All rights reserved.</rights><category term="${rUser.category}"/>`;
 
 	for(let i = 0; i < rPost.length; i++){
 		let id = rPost[i].id;
@@ -592,6 +593,7 @@ router.post("/generatePages", async request => {
 		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
 
 		rssFeed += `<item><title><![CDATA[${title}]]></title><link>${fullPostURL}</link><guid>${fullPostURL}</guid><pubDate>${new Date(created).toUTCString()}</pubDate><description><![CDATA[${description}]]></description><author>${rUser.email} (${rUser.author})</author><enclosure url="${picture}" length="0" type="image/svg"/></item>`;
+		atomFeed += `<entry><title type="html"><![CDATA[${title}]]></title><id>${fullPostURL}</id><link href="${fullPostURL}"/><updated>${new Date(created).toISOString()}</updated><summary type="html"><![CDATA[${description}]]></summary><author><name>${rUser.author}</name><email>${rUser.email}</email><uri>${link}</uri></author></entry>`;
 
 		let avatar = env.CDN + "/avatars/" + username + ".png";
 		let twitter = rUser.social?.twitter || env.TWITTER;
@@ -643,7 +645,10 @@ router.post("/generatePages", async request => {
 	}
 
 	rssFeed += "</channel></rss>";
+	atomFeed += "</feed>";
+
 	await setPageValue("feed_rss_" + data.username, rssFeed);
+	await setPageValue("feed_atom_"  + data.username, atomFeed);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
