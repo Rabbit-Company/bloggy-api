@@ -729,6 +729,8 @@ router.post("/generatePages", async request => {
 	userTemplate = userTemplate.replaceAll("::authorURL::", "/creator/" + rUser.username);
 	userTemplate = userTemplate.replaceAll("::language::", rUser.language);
 	userTemplate = userTemplate.replaceAll("::metaRSS::", env.DOMAIN + "/creator/" + rUser.username + "/feed.rss");
+	userTemplate = userTemplate.replaceAll("::metaAtom::", env.DOMAIN + "/creator/" + rUser.username + "/feed.atom");
+	userTemplate = userTemplate.replaceAll("::metaJson::", env.DOMAIN + "/creator/" + rUser.username + "/feed.json");
 	userTemplate = userTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + rUser.username);
 	userTemplate = userTemplate.replaceAll("::analytics::", env.ANALYTICS);
 	userTemplate = userTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
@@ -875,6 +877,10 @@ router.post("/generatePages", async request => {
 	userTemplate = userTemplate.replaceAll("::post::", userHtml);
 	userTemplate = userTemplate.replaceAll("::jsondl::", JSON.stringify(userJsondl));
 	await setPageValue("content_" + data.username, userTemplate);
+
+	// Metadata
+	//let metadata = ``;
+	//await setPageValue("metadata_" + data.username, metadata);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
