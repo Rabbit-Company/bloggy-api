@@ -628,7 +628,7 @@ router.post("/generateMainPage", async request => {
 		let username = rUsers[i].username;
 		let author = rUsers[i].author;
 		let avatar = env.CDN + "/avatars/" + username + ".png";
-		html += `<li><div class='space-y-6'><a href='/creator/${username}/'><img class='mx-auto h-40 w-40 shadow-lg rounded-full' src='${avatar}' alt='${author}' /></a><div class='space-y-2'><div class='space-y-1 text-lg font-medium leading-6'><a href='/creator/${username}/'><h2>${author}</h2></a></div></div></div></li>`;
+		html += `<li><div class='space-y-6'><a href='/creator/${username}'><img class='mx-auto h-40 w-40 shadow-lg rounded-full' src='${avatar}' alt='${author}' /></a><div class='space-y-2'><div class='space-y-1 text-lg font-medium leading-6'><a href='/creator/${username}'><h2>${author}</h2></a></div></div></div></li>`;
 	}
 	tempTemplate = tempTemplate.replaceAll("::creators::", html);
 	await setPageValue('main', tempTemplate);
@@ -711,6 +711,36 @@ router.post("/generatePages", async request => {
 		"items": []
 	};
 
+	let userTemplate = templateUser;
+	userTemplate = userTemplate.replaceAll("::metatitle::", rUser.title);
+	userTemplate = userTemplate.replaceAll("::metaDescription::", rUser.description);
+	userTemplate = userTemplate.replaceAll("::title::", rUser.title);
+	userTemplate = userTemplate.replaceAll("::description::", rUser.description);
+	userTemplate = userTemplate.replaceAll("::siteName::", env.TITLE);
+	userTemplate = userTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + rUser.username + ".png");
+	userTemplate = userTemplate.replaceAll("::username::", rUser.username);
+	userTemplate = userTemplate.replaceAll("::author::", rUser.author);
+	userTemplate = userTemplate.replaceAll("::authorURL::", "/creator/" + rUser.username);
+	userTemplate = userTemplate.replaceAll("::language::", rUser.language);
+	userTemplate = userTemplate.replaceAll("::metaRSS::", env.DOMAIN + "/creator/" + rUser.username + "/feed.rss");
+	userTemplate = userTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + rUser.username);
+	userTemplate = userTemplate.replaceAll("::analytics::", env.ANALYTICS);
+	userTemplate = userTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
+	userTemplate = userTemplate.replaceAll("::metaTwitterSite::", env.TWITTER.replace("https://twitter.com/", "@"));
+
+	let twitterCreator = (typeof(rUser.social?.twitter) === 'string') ? rUser.social.twitter : env.TWITTER;
+	userTemplate = userTemplate.replaceAll("::metaTwitterCreator::", twitterCreator.replace("https://twitter.com/", "@"));
+
+	let social = "";
+	if(typeof(rUser.social?.website) === 'string') social += "<a href='" + rUser.social.website + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Website</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M19.5 7a8.998 8.998 0 0 0 -7.5 -4a8.991 8.991 0 0 0 -7.484 4'></path><path d='M11.5 3a16.989 16.989 0 0 0 -1.826 4'></path><path d='M12.5 3a16.989 16.989 0 0 1 1.828 4.004'></path><path d='M19.5 17a8.998 8.998 0 0 1 -7.5 4a8.991 8.991 0 0 1 -7.484 -4'></path><path d='M11.5 21a16.989 16.989 0 0 1 -1.826 -4'></path><path d='M12.5 21a16.989 16.989 0 0 0 1.828 -4.004'></path><path d='M2 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M17 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M9.5 10l1 4l1.5 -4l1.5 4l1 -4'></path></svg></a>";
+	if(typeof(rUser.social?.discord) === 'string') social += "<a href='" + rUser.social.discord + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Discord</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><circle cx='9' cy='12' r='1'></circle><circle cx='15' cy='12' r='1'></circle><path d='M7.5 7.5c3.5 -1 5.5 -1 9 0'></path><path d='M7 16.5c3.5 1 6.5 1 10 0'></path><path d='M15.5 17c0 1 1.5 3 2 3c1.5 0 2.833 -1.667 3.5 -3c.667 -1.667 .5 -5.833 -1.5 -11.5c-1.457 -1.015 -3 -1.34 -4.5 -1.5l-1 2.5'></path><path d='M8.5 17c0 1 -1.356 3 -1.832 3c-1.429 0 -2.698 -1.667 -3.333 -3c-.635 -1.667 -.476 -5.833 1.428 -11.5c1.388 -1.015 2.782 -1.34 4.237 -1.5l1 2.5'></path></svg></a>";
+	if(typeof(rUser.social?.twitter) === 'string') social += "<a href='" + rUser.social.twitter + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Twitter</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z'></path></svg></a>";
+	if(typeof(rUser.social?.github) === 'string') social += "<a href='" + rUser.social.github + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Github</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5'></path></svg></a>";
+
+	let userJsondl = [];
+
+	let limit = 8;
+	let userHtml = "";
 	for(let i = 0; i < rPost.length; i++){
 		let id = rPost[i].id;
 		let username = rPost[i].username;
@@ -725,12 +755,16 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
-		let wordCount = getWordCount(markdown);
-
 		let avatar = env.CDN + "/avatars/" + username + ".png";
 		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
 		let fullAuthorURL = env.DOMAIN + "/creator/" + username;
+		let postLocation = "/creator/" + username + "/" + id;
 
+		if(i < limit){
+			userHtml += `<div class='flex flex-col overflow-hidden rounded-lg shadow-lg'><div class='flex-shrink-0'><img class='h-48 w-full object-cover' src='${picture}' alt='${title}'></div><div class='flex flex-1 flex-col justify-between bg-white p-6'><div class='flex-1'><p class='text-sm font-medium text-indigo-600'><a href='/creator/${username}?tag=${tag.replaceAll(" ", "_")}' class='hover:underline'>${tag}</a></p><a href='${postLocation}' class='mt-2 block'><p class='text-xl font-semibold text-gray-900'>${title}</p><p class='mt-3 text-base text-gray-500'>${description}</p></a></div><div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/${username}'><span class='sr-only'>${rUser.author}</span><img class='h-10 w-10 rounded-full' src='${avatar}' alt='${rUser.author}'></a></div><div class='ml-3'><p class='text-sm font-medium text-gray-900'><a href='/creator/${username}' class='hover:underline'>${rUser.author}</a></p><div class='flex space-x-1 text-sm text-gray-500'><time datetime='${created}'>${created}</time><span aria-hidden='true'>&middot;</span><span>${read_time} min read</span></div></div></div></div></div>`;
+		}
+
+		let wordCount = getWordCount(markdown);
 		rssFeed += `<item><title><![CDATA[${title}]]></title><link>${fullPostURL}</link><guid>${fullPostURL}</guid><pubDate>${new Date(created).toUTCString()}</pubDate><description><![CDATA[${description}]]></description><author>${rUser.email} (${rUser.author})</author><enclosure url="${picture}" length="0" type="image/svg"/></item>`;
 		atomFeed += `<entry><title type="html"><![CDATA[${title}]]></title><id>${fullPostURL}</id><link href="${fullPostURL}"/><updated>${new Date(created).toISOString()}</updated><summary type="html"><![CDATA[${description}]]></summary><author><name>${rUser.author}</name><email>${rUser.email}</email><uri>${link}</uri></author></entry>`;
 		jsonFeed.items.push({
@@ -780,17 +814,11 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + fullPostURL);
 		tempTemplate = tempTemplate.replaceAll("::analytics::", env.ANALYTICS);
 		tempTemplate = tempTemplate.replaceAll("::metaKeywords::", keywords);
-
-		let social = "";
-		if(typeof(rUser.social?.website) === 'string') social += "<a href='" + rUser.social.website + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Website</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M19.5 7a8.998 8.998 0 0 0 -7.5 -4a8.991 8.991 0 0 0 -7.484 4'></path><path d='M11.5 3a16.989 16.989 0 0 0 -1.826 4'></path><path d='M12.5 3a16.989 16.989 0 0 1 1.828 4.004'></path><path d='M19.5 17a8.998 8.998 0 0 1 -7.5 4a8.991 8.991 0 0 1 -7.484 -4'></path><path d='M11.5 21a16.989 16.989 0 0 1 -1.826 -4'></path><path d='M12.5 21a16.989 16.989 0 0 0 1.828 -4.004'></path><path d='M2 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M17 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M9.5 10l1 4l1.5 -4l1.5 4l1 -4'></path></svg></a>";
-		if(typeof(rUser.social?.discord) === 'string') social += "<a href='" + rUser.social.discord + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Discord</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><circle cx='9' cy='12' r='1'></circle><circle cx='15' cy='12' r='1'></circle><path d='M7.5 7.5c3.5 -1 5.5 -1 9 0'></path><path d='M7 16.5c3.5 1 6.5 1 10 0'></path><path d='M15.5 17c0 1 1.5 3 2 3c1.5 0 2.833 -1.667 3.5 -3c.667 -1.667 .5 -5.833 -1.5 -11.5c-1.457 -1.015 -3 -1.34 -4.5 -1.5l-1 2.5'></path><path d='M8.5 17c0 1 -1.356 3 -1.832 3c-1.429 0 -2.698 -1.667 -3.333 -3c-.635 -1.667 -.476 -5.833 1.428 -11.5c1.388 -1.015 2.782 -1.34 4.237 -1.5l1 2.5'></path></svg></a>";
-		if(typeof(rUser.social?.twitter) === 'string') social += "<a href='" + rUser.social.twitter + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Twitter</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z'></path></svg></a>";
-		if(typeof(rUser.social?.github) === 'string') social += "<a href='" + rUser.social.github + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Github</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5'></path></svg></a>";
 		tempTemplate = tempTemplate.replaceAll("::social::", social);
 
 		let html = "<h1 class='post-title'>" + title + "</h1>";
 		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + created + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
-		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' loading='lazy' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
+		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
 
 		let postHtml = marked.parse(markdown, {
 			gfm: true,
@@ -829,6 +857,7 @@ router.post("/generatePages", async request => {
 				"url": website
 			},
 		}
+		userJsondl.push(jsondl);
 		tempTemplate = tempTemplate.replaceAll("::jsondl::", JSON.stringify(jsondl));
 
 		await setPageValue(`post_${username}_${id}`, tempTemplate);
@@ -840,6 +869,11 @@ router.post("/generatePages", async request => {
 	await setPageValue("feed_rss_" + data.username, rssFeed);
 	await setPageValue("feed_atom_"  + data.username, atomFeed);
 	await setPageValue("feed_json_"  + data.username, JSON.stringify(jsonFeed));
+
+	// User Main Page
+	userTemplate = userTemplate.replaceAll("::post::", userHtml);
+	userTemplate = userTemplate.replaceAll("::jsondl::", JSON.stringify(userJsondl));
+	await setPageValue("content_" + data.username, userTemplate);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
