@@ -580,7 +580,7 @@ router.post("/generateMainPage", async request => {
 	}
 
 	// Metadata
-	let metadata = `var DOMAIN = "${env.DOMAIN}";var CDN = "${env.CDN}";var CREATORS = ${JSON.stringify(creators)};`;
+	let metadata = `var DOMAIN = "${env.DOMAIN}"; var CDN = "${env.CDN}"; var CREATORS = ${JSON.stringify(creators)};`;
 	await setPageValue('metadata', metadata);
 
 	// Site Map
