@@ -590,13 +590,17 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
+		let wordCount = getWordCount(markdown);
+
 		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
+		let fullAuthorURL = env.DOMAIN + "/creator/" + username;
 
 		rssFeed += `<item><title><![CDATA[${title}]]></title><link>${fullPostURL}</link><guid>${fullPostURL}</guid><pubDate>${new Date(created).toUTCString()}</pubDate><description><![CDATA[${description}]]></description><author>${rUser.email} (${rUser.author})</author><enclosure url="${picture}" length="0" type="image/svg"/></item>`;
 		atomFeed += `<entry><title type="html"><![CDATA[${title}]]></title><id>${fullPostURL}</id><link href="${fullPostURL}"/><updated>${new Date(created).toISOString()}</updated><summary type="html"><![CDATA[${description}]]></summary><author><name>${rUser.author}</name><email>${rUser.email}</email><uri>${link}</uri></author></entry>`;
 
 		let avatar = env.CDN + "/avatars/" + username + ".png";
 		let twitter = rUser.social?.twitter || env.TWITTER;
+		let website = rUser.social?.website || fullAuthorURL;
 
 		let tempTemplate = templatePost;
 		tempTemplate = tempTemplate.replaceAll("::metatitle::", title);
@@ -615,11 +619,11 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::username::", username);
 		tempTemplate = tempTemplate.replaceAll("::previousLocation::", "/creator/" + username);
 		tempTemplate = tempTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
-		tempTemplate = tempTemplate.replaceAll("::metaRSS::", env.DOMAIN + "/creator/" + username + "/feed.rss");
-		tempTemplate = tempTemplate.replaceAll("::metaAtom::", env.DOMAIN + "/creator/" + username + "/feed.atom");
+		tempTemplate = tempTemplate.replaceAll("::metaRSS::", fullAuthorURL + "/feed.rss");
+		tempTemplate = tempTemplate.replaceAll("::metaAtom::", fullAuthorURL + "/feed.atom");
 		tempTemplate = tempTemplate.replaceAll("::metaTwitterSite::", env.TWITTER.replace("https://twitter.com/", "@"));
 		tempTemplate = tempTemplate.replaceAll("::metaTwitterCreator::", twitter.replace("https://twitter.com/", "@"));
-		tempTemplate = tempTemplate.replaceAll("::metaURL::", env.DOMAIN + "/creator/" + username + "/" + id);
+		tempTemplate = tempTemplate.replaceAll("::metaURL::", fullPostURL);
 		tempTemplate = tempTemplate.replaceAll("::shareTwitter::", title + "%0A%0A" + fullPostURL);
 		tempTemplate = tempTemplate.replaceAll("::analytics::", env.ANALYTICS);
 		tempTemplate = tempTemplate.replaceAll("::metaKeywords::", keywords);
@@ -635,13 +639,45 @@ router.post("/generatePages", async request => {
 		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + created + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
 		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' loading='lazy' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
 
-		html += marked.parse(markdown, {
+		let postHtml = marked.parse(markdown, {
 			gfm: true,
 			breaks: true,
 			sanitizer: DOMPurify.sanitize
 		});
 
+		html += postHtml;
 		tempTemplate = tempTemplate.replaceAll("::post::", html);
+
+		const jsondl = {
+			"@context": "http://schema.org",
+			"@type": "BlogPosting",
+			"headline": title,
+			"description": description,
+			"url": fullPostURL,
+			"genre": category,
+			"articleSection": category,
+			"wordcount": wordCount,
+			"keywords": keywords.split(','),
+			"image": [
+				picture,
+				avatar
+			],
+			"datePublished": created,
+			"dateModified": new Date().toISOString(),
+			"articleBody": postHtml,
+			"publisher": {
+				"@type": "Organization",
+				"name": rUser.title,
+				"url": fullAuthorURL
+			},
+			"author": {
+				"@type": "Person",
+				"name": rUser.author,
+				"url": website
+			},
+		}
+		tempTemplate = tempTemplate.replaceAll("::jsondl::", JSON.stringify(jsondl));
+
 		await setPageValue(`post_${username}_${id}`, tempTemplate);
 	}
 
