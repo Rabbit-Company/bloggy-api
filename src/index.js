@@ -744,6 +744,7 @@ router.post("/generatePages", async request => {
 
 	let limit = 8;
 	let userHtml = "";
+	let posts = {};
 	for(let i = 0; i < rPost.length; i++){
 		let id = rPost[i].id;
 		let username = rPost[i].username;
@@ -762,6 +763,15 @@ router.post("/generatePages", async request => {
 		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
 		let fullAuthorURL = env.DOMAIN + "/creator/" + username;
 		let postLocation = "/creator/" + username + "/" + id;
+
+		posts[id] = {};
+		posts[id].title = title;
+		posts[id].description = description;
+		posts[id].picture = picture;
+		posts[id].tag = tag;
+		posts[id].keywords = keywords.split(',');
+		posts[id].date = created;
+		posts[id].read = read_time;
 
 		if(i < limit){
 			userHtml += `<div class='flex flex-col overflow-hidden rounded-lg shadow-lg'><div class='flex-shrink-0'><img class='h-48 w-full object-cover' src='${picture}' alt='${title}'></div><div class='flex flex-1 flex-col justify-between bg-white p-6'><div class='flex-1'><p class='text-sm font-medium text-indigo-600'><a href='/creator/${username}?tag=${tag.replaceAll(" ", "_")}' class='hover:underline'>${tag}</a></p><a href='${postLocation}' class='mt-2 block'><p class='text-xl font-semibold text-gray-900'>${title}</p><p class='mt-3 text-base text-gray-500'>${description}</p></a></div><div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/${username}'><span class='sr-only'>${rUser.author}</span><img class='h-10 w-10 rounded-full' src='${avatar}' alt='${rUser.author}'></a></div><div class='ml-3'><p class='text-sm font-medium text-gray-900'><a href='/creator/${username}' class='hover:underline'>${rUser.author}</a></p><div class='flex space-x-1 text-sm text-gray-500'><time datetime='${created}'>${created}</time><span aria-hidden='true'>&middot;</span><span>${read_time} min read</span></div></div></div></div></div>`;
@@ -879,8 +889,8 @@ router.post("/generatePages", async request => {
 	await setPageValue("content_" + data.username, userTemplate);
 
 	// Metadata
-	//let metadata = ``;
-	//await setPageValue("metadata_" + data.username, metadata);
+	let metadata = `var DOMAIN = "${env.DOMAIN}"; var CDN = "${env.CDN}"; var USERNAME = "${data.username}"; var CATEGORY = "${rUser.category}"; var LANGUAGE = "${rUser.language}"; var POSTS = ${JSON.stringify(posts)};`;
+	await setPageValue("metadata_" + data.username, metadata);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
