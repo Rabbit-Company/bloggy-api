@@ -889,7 +889,7 @@ router.post("/generatePages", async request => {
 	await setPageValue("content_" + data.username, userTemplate);
 
 	// Metadata
-	let metadata = `var DOMAIN = "${env.DOMAIN}"; var CDN = "${env.CDN}"; var USERNAME = "${data.username}"; var CATEGORY = "${rUser.category}"; var LANGUAGE = "${rUser.language}"; var POSTS = ${JSON.stringify(posts)};`;
+	let metadata = `var DOMAIN = "${env.DOMAIN}"; var CDN = "${env.CDN}"; var USERNAME = "${data.username}"; var AUTHOR = "${rUser.author}"; var CATEGORY = "${rUser.category}"; var LANGUAGE = "${rUser.language}"; var POSTS = ${JSON.stringify(posts)};`;
 	await setPageValue("metadata_" + data.username, metadata);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
