@@ -721,6 +721,7 @@ router.post("/generatePages", async request => {
 
 	await setPageValue("feed_rss_" + data.username, rssFeed);
 	await setPageValue("feed_atom_"  + data.username, atomFeed);
+	await setPageValue("feed_json_"  + data.username, JSON.stringify(jsonFeed));
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
