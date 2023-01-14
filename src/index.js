@@ -16,7 +16,7 @@ const languages = ['ab','aa','af','ak','sq','am','ar','an','hy','as','av','ae','
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
 	return new Response(json, {
-		headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS', 'Access-Control-Max-Age': '86400' },
+		headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Max-Age': '86400' },
 		status: statusCode
 	});
 }
@@ -903,6 +903,11 @@ export default {
 	async fetch(request2, env2){
 		request = request2;
 		env = env2;
+
+		if(request.method.toLowerCase() === "options") {
+			return new Response("ok", { headers: { 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': '*' } });
+		}
+
 		date = new Date().toISOString().split('T')[0];
 		let IP = request2.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
