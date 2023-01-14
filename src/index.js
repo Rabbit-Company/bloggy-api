@@ -287,29 +287,36 @@ router.post("/login", async request => {
 
 	let password = await generateHash(data.password);
 	try{
-		const { results } = await env.DB.prepare("SELECT * FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
+		let { results } = await env.DB.prepare("SELECT * FROM creators WHERE username = ?1 AND password = ?2").bind(data.username, password).all();
 		if(results.length == 1){
-			let token = await forceGetToken(data.username);
-			let json = {
-				"token": token,
-				"username": results[0].username,
-				"email": results[0].email,
-				"title": results[0].title,
-				"description": results[0].description,
-				"author": results[0].author,
-				"category": results[0].category,
-				"language": results[0].language,
-				"social": results[0].social,
-				"theme": results[0].theme,
-				"advertisement": results[0].advertisement,
-				"accessed": results[0].accessed,
-				"created": results[0].created
-			};
-			json.fa_enabled = (results[0].fa_secret !== null);
+			let userData = results[0];
 			try{
-				if(results[0].accessed != date) await env.DB.prepare("UPDATE creators SET accessed = ?1 WHERE username = ?2").bind(date, data.username).run();
-			}catch{}
-			return jsonResponse({ "error": 0, "info": "Success", "data": json });
+				let results = await env.DB.prepare("SELECT * FROM posts WHERE username = ?1").bind(data.username).all();
+				let postData = results.results;
+				let token = await forceGetToken(data.username);
+				let userJson = {
+					"token": token,
+					"username": userData.username,
+					"email": userData.email,
+					"title": userData.title,
+					"description": userData.description,
+					"author": userData.author,
+					"category": userData.category,
+					"language": userData.language,
+					"social": userData.social,
+					"theme": userData.theme,
+					"advertisement": userData.advertisement,
+					"accessed": userData.accessed,
+					"created": userData.created
+				};
+				userJson.fa_enabled = (userData.fa_secret !== null);
+				try{
+					if(userData.accessed != date) await env.DB.prepare("UPDATE creators SET accessed = ?1 WHERE username = ?2").bind(date, data.username).run();
+				}catch{}
+				return jsonResponse({ "error": 0, "info": "Success", "data": { "user": userJson, "posts": postData } });
+			}catch(err){
+				return jsonResponse({ "error": 1028, "info": "Something went wrong while connecting to the database.", "err": err.message });
+			}
 		}
 		return jsonResponse({ "error": 1007, "info": "Password is incorrect." });
 	}catch{
