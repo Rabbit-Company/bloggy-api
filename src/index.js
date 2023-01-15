@@ -1014,7 +1014,7 @@ export default {
 		env = env2;
 
 		if(request.method.toLowerCase() === "options") {
-			return new Response("ok", { headers: { 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': '*' } });
+			return new Response("ok", { headers: { 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS', 'Access-Control-Allow-Headers': '*' } });
 		}
 
 		date = new Date().toISOString().split('T')[0];
