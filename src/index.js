@@ -429,16 +429,11 @@ router.post("/deleteAccount", async request => {
 	}catch{
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
 	}
-	rPost = rPost.results;
-
-	let ids = [];
-	for(let i = 0; i < rPost.length; i++){
-		ids.push(rPost[i].id);
-	}
+	let ids = rPost.results.map(obj => obj.id);
 
 	try{
 		const images = await env.R2.list({ prefix: `posts/${data.username}/`, delimiter: '/' });
-		const keys = images.objects.map(obj => obj.key)
+		const keys = images.objects.map(obj => obj.key);
 		await env.R2.delete(keys);
 
 		await env.R2.delete("avatars/" + data.username);
