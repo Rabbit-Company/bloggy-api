@@ -492,7 +492,7 @@ router.put("/saveAvatar", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
-	await env.R2.put("avatars/" + auth.user + ".png", request.body);
+	await env.R2.put("avatars/" + auth.user, request.body);
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
@@ -710,7 +710,7 @@ router.post("/generateMainPage", async request => {
 		if(i >= amount) break;
 		let username = rUsers[i].username;
 		let author = rUsers[i].author;
-		let avatar = env.CDN + "/avatars/" + username + ".png";
+		let avatar = env.CDN + "/avatars/" + username;
 		html += `<li><div class='space-y-6'><a href='/creator/${username}'><img class='mx-auto h-40 w-40 shadow-lg rounded-full' src='${avatar}' alt='${author}' /></a><div class='space-y-2'><div class='space-y-1 text-lg font-medium leading-6'><a href='/creator/${username}'><h2>${author}</h2></a></div></div></div></li>`;
 	}
 	tempTemplate = tempTemplate.replaceAll("::creators::", html);
@@ -773,7 +773,7 @@ router.post("/generatePages", async request => {
 	rPost = rPost.results;
 
 	let link = env.DOMAIN + "/creator/" + data.username;
-	let avatar = env.CDN + "/avatars/" + data.username + ".png";
+	let avatar = env.CDN + "/avatars/" + data.username;
 
 	let social = "";
 	if(typeof(rUser.social?.website) === 'string') social += "<a href='" + rUser.social.website + "' target='_blank' class='text-gray-500 hover:text-gray-600'><span class='sr-only'>Website</span><svg class='h-6 w-6' stroke='currentColor' viewBox='0 0 24 24' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path d='M19.5 7a8.998 8.998 0 0 0 -7.5 -4a8.991 8.991 0 0 0 -7.484 4'></path><path d='M11.5 3a16.989 16.989 0 0 0 -1.826 4'></path><path d='M12.5 3a16.989 16.989 0 0 1 1.828 4.004'></path><path d='M19.5 17a8.998 8.998 0 0 1 -7.5 4a8.991 8.991 0 0 1 -7.484 -4'></path><path d='M11.5 21a16.989 16.989 0 0 1 -1.826 -4'></path><path d='M12.5 21a16.989 16.989 0 0 0 1.828 -4.004'></path><path d='M2 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M17 10l1 4l1.5 -4l1.5 4l1 -4'></path><path d='M9.5 10l1 4l1.5 -4l1.5 4l1 -4'></path></svg></a>";
@@ -806,7 +806,7 @@ router.post("/generatePages", async request => {
 	userTemplate = userTemplate.replaceAll("::title::", rUser.title);
 	userTemplate = userTemplate.replaceAll("::description::", rUser.description);
 	userTemplate = userTemplate.replaceAll("::siteName::", env.TITLE);
-	userTemplate = userTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + rUser.username + ".png");
+	userTemplate = userTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + rUser.username);
 	userTemplate = userTemplate.replaceAll("::username::", rUser.username);
 	userTemplate = userTemplate.replaceAll("::author::", rUser.author);
 	userTemplate = userTemplate.replaceAll("::authorURL::", "/creator/" + rUser.username);
@@ -842,7 +842,7 @@ router.post("/generatePages", async request => {
 		let created = rPost[i].created;
 		let read_time = rPost[i].read_time;
 
-		let avatar = env.CDN + "/avatars/" + username + ".png";
+		let avatar = env.CDN + "/avatars/" + username;
 		let fullPostURL = env.DOMAIN + "/creator/" + username + "/" + id;
 		let fullAuthorURL = env.DOMAIN + "/creator/" + username;
 		let postLocation = "/creator/" + username + "/" + id;
@@ -897,7 +897,7 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::title::", rUser.title);
 		tempTemplate = tempTemplate.replaceAll("::description::", rUser.description);
 		tempTemplate = tempTemplate.replaceAll("::siteName::", env.TITLE);
-		tempTemplate = tempTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + username + ".png");
+		tempTemplate = tempTemplate.replaceAll("::icon::", env.CDN + "/avatars/" + username);
 		tempTemplate = tempTemplate.replaceAll("::username::", username);
 		tempTemplate = tempTemplate.replaceAll("::previousLocation::", "/creator/" + username);
 		tempTemplate = tempTemplate.replaceAll("::metaDomain::", env.DOMAIN.replace("https://", ""));
