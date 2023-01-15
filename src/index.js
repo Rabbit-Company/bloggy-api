@@ -319,6 +319,7 @@ router.post("/login", async request => {
 					"social": userData.social,
 					"theme": userData.theme,
 					"advertisement": userData.advertisement,
+					"yubico": userData.yubico_otp,
 					"accessed": userData.accessed,
 					"created": userData.created
 				};
