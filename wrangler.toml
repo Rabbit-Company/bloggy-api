@@ -12,6 +12,10 @@ binding = "DB"
 database_name = "bloggy"
 database_id = "92ee90cf-925c-423c-b66b-57ec81663c1e"
 
+[[r2_buckets]]
+binding = 'R2'
+bucket_name = 'bloggy'
+
 [vars]
 DOMAIN = "https://test.bloggy.io"
 CDN = "https://cdn.bloggy.io"
