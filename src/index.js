@@ -471,7 +471,9 @@ router.put("/saveAvatar", async request => {
 	}
 
 	const auth = basicAuthentication(request);
-	if(auth == null) return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+	if(auth == null){
+		return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+	}
 
 	if(!isUsernameValid(auth.user)){
 		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
