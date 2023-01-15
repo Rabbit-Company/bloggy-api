@@ -467,12 +467,17 @@ router.post("/getPosts", async request => {
 
 router.put("/saveAvatar", async request => {
 	if(!request.headers.has('Authorization')) {
-		return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	let fileSize = request.headers.get('Content-Length');
+	if(fileSize > 300_000){
+		return jsonResponse({ "error": 1029, "info": "Avatars can't be bigger than 300kB. Please choose smaller image." });
 	}
 
 	const auth = basicAuthentication(request);
 	if(auth == null){
-		return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
 	if(!isUsernameValid(auth.user)){
