@@ -438,10 +438,7 @@ router.post("/deleteAccount", async request => {
 
 	try{
 		const images = await env.R2.list({ prefix: `posts/${data.username}/`, delimiter: '/' });
-		let keys = [];
-		for(let image of images.objects){
-			keys.push(image.key);
-		}
+		const keys = images.objects.map(obj => obj.key)
 		await env.R2.delete(keys);
 
 		await env.R2.delete("avatars/" + data.username);
