@@ -232,6 +232,19 @@ async function forceGetToken(username){
 	return token;
 }
 
+function basicAuthentication(request) {
+  const Authorization = request.headers.get('Authorization');
+  const [scheme, encoded] = Authorization.split(' ');
+  if (!encoded || scheme !== 'Basic') return null;
+  const buffer = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
+  const decoded = new TextDecoder().decode(buffer).normalize();
+
+  const index = decoded.indexOf(':');
+  if (index === -1 || /[\0-\x1F\x7F]/.test(decoded)) return null;
+
+  return { user: decoded.substring(0, index), pass: decoded.substring(index + 1) };
+}
+
 async function isAuthorized(username, token){
 	let key = 'token-' + username + '-' + hashedIP;
 	let token2 = await getAdminValue(key);
@@ -450,6 +463,30 @@ router.post("/getPosts", async request => {
 		return jsonResponse({ "error": 0, "info": "Success", "data": results });
 	}catch{};
 	return jsonResponse({ "error": 1008, "info": "Something went wrong while connecting to the database." });
+});
+
+router.put("/saveAvatar", async request => {
+	if(!request.headers.has('Authorization')) {
+		return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+	}
+
+	const auth = basicAuthentication(request);
+	if(auth == null) return jsonResponse({ "error": 1000, "info": "Authorization is required!" });
+
+	if(!isUsernameValid(auth.user)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(auth.pass)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!(await isAuthorized(auth.user, auth.pass))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	await env.R2.put("avatars/" + auth.user + ".png", request.body);
+	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
 router.post("/createPost", async request => {
