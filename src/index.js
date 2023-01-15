@@ -420,6 +420,38 @@ router.post("/deleteAccount", async request => {
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
+router.post("/getPosts", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		const { results } = await env.DB.prepare("SELECT * FROM posts WHERE username = ?1").bind(data.username).all();
+		return jsonResponse({ "error": 0, "info": "Success", "data": results });
+	}catch{};
+	return jsonResponse({ "error": 1008, "info": "Something went wrong while connecting to the database." });
+});
+
 router.post("/createPost", async request => {
 	let data = {};
 
