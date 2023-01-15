@@ -423,13 +423,43 @@ router.post("/deleteAccount", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
+	let rPost = {};
 	try{
+		rPost = await env.DB.prepare("SELECT * FROM posts WHERE username = ?").bind(data.username).all();
+	}catch{
+		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
+	}
+	rPost = rPost.results;
+
+	let ids = [];
+	for(let i = 0; i < rPost.length; i++){
+		ids.push(rPost[i].id);
+	}
+
+	try{
+		const images = await env.R2.list({ prefix: `posts/${data.username}/`, delimiter: '/' });
+		for(let image of images.objects){
+			await env.R2.delete(image.key);
+		}
+		await env.R2.delete("avatars/" + data.username);
+
+		for(let id of ids){
+			await deletePageValue(`post_${data.username}_${id}`);
+		}
+
+		await env.DB.prepare("DELETE FROM posts WHERE username = ?").bind(data.username).run();
 		await env.DB.prepare("DELETE FROM creators WHERE username = ?").bind(data.username).run();
+
+		await deletePageValue("feed_rss_" + data.username);
+		await deletePageValue("feed_atom_" + data.username);
+		await deletePageValue("feed_json_" + data.username);
+		await deletePageValue("content_" + data.username);
+		await deletePageValue("metadata_" + data.username);
+
+		await deleteAdminValue('token-' + data.username + '-' + hashedIP);
 	}catch(error){
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your account. Please try again later." });
 	}
-
-	await deleteAdminValue('token-' + data.username + '-' + hashedIP);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
