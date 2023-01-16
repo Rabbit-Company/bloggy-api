@@ -438,7 +438,7 @@ router.post("/deleteAccount", async request => {
 	let ids = rPost.results.map(result => result.id);
 
 	try{
-		const images = await env.R2.list({ prefix: `posts/${data.username}/`, delimiter: '/' });
+		const images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
 		let keys = images.objects.map(obj => obj.key);
 		if(keys.length !== 0) await env.R2.delete(keys);
 
@@ -557,6 +557,39 @@ router.put("/saveImage", async request => {
 
 	await env.R2.put("images/" + auth.user + "/" + uuidv4(), request.body);
 	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
+router.post("/getImages", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		const images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
+		let keys = images.objects.map(obj => env.CDN + "/" + obj.key);
+		return jsonResponse({ "error": 0, "info": "Success", "images": keys });
+	}catch{};
+	return jsonResponse({ "error": 1008, "info": "Something went wrong while trying to the get images." });
 });
 
 router.post("/createPost", async request => {
@@ -896,7 +929,7 @@ router.post("/generatePages", async request => {
 		let username = rPost[i].username;
 		let title = rPost[i].title;
 		let description = rPost[i].description;
-		let picture = (rPost[i].picture.startsWith('http')) ? rPost[i].picture : env.CDN + "/posts/" + username + "/" + rPost[i].picture;
+		let picture = (rPost[i].picture.startsWith('http')) ? rPost[i].picture : env.CDN + "/images/" + username + "/" + rPost[i].picture;
 		let markdown = rPost[i].markdown;
 		let category = rPost[i].category;
 		let language = rPost[i].language;
