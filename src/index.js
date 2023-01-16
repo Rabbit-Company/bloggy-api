@@ -509,6 +509,15 @@ router.put("/saveAvatar", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
+	if(!request.headers.has('Content-Type')) {
+		return jsonResponse({ "error": 1031, "info": "Content-Type header needs to be provided." });
+	}
+
+	let contentType = request.headers.get('Content-Type');
+	if(!supportedImageFileTypes.includes(contentType)){
+		return jsonResponse({ "error": 1032, "info": "File type is not supported. Please upload .png, .jpg, .gif, .svg or .webp" });
+	}
+
 	let fileSize = request.headers.get('Content-Length');
 	if(fileSize > 300_000){
 		return jsonResponse({ "error": 1029, "info": "Avatars can't be bigger than 300kB. Please choose smaller image." });
@@ -531,7 +540,13 @@ router.put("/saveAvatar", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
-	await env.R2.put("avatars/" + auth.user, request.body);
+	const options = {
+		httpMetadata: {
+			contentType: contentType,
+		},
+	}
+
+	await env.R2.put("avatars/" + auth.user, request.body, options);
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
