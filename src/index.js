@@ -747,6 +747,81 @@ router.post("/createPost", async request => {
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
+router.post("/editPost", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token || !data.id || !data.title || !data.description || !data.picture || !data.markdown || !data.category || !data.language || !data.tag || !data.keywords){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, id, title, description, picture, markdown, category, language, tag, keywords" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!isPostIDValid(data.id)){
+		return jsonResponse({ "error": 1018, "info": "Post ID can only contain lower case characters, numbers and hypens. It also need to be between 5 and 100 characters long." });
+	}
+
+	if(!isPostTitleValid(data.title)){
+		return jsonResponse({ "error": 1019, "info": "Title needs to be between 5 and 100 characters long." });
+	}
+
+	if(!isPostDescriptionValid(data.description)){
+		return jsonResponse({ "error": 1020, "info": "Description needs to be between 30 and 300 characters long." });
+	}
+
+	if(!isPostPictureValid(data.picture)){
+		return jsonResponse({ "error": 1021, "info": "Picture needs to be between 5 and 500 characters long." });
+	}
+
+	if(!isPostMarkdownValid(data.markdown)){
+		return jsonResponse({ "error": 1022, "info": "Post needs to be between 150 and 10000 words long." });
+	}
+
+	if(!isCategoryValid(data.category)){
+		return jsonResponse({ "error": 1012, "info": "Category is invalid." });
+	}
+
+	if(!isLanguageValid(data.language)){
+		return jsonResponse({ "error": 1013, "info": "Language is invalid. Please use ISO 639-1." });
+	}
+
+	if(!isPostTagValid(data.tag)){
+		return jsonResponse({ "error": 1023, "info": "Tag needs to be between 3 and 30 characters long." });
+	}
+
+	if(!isPostkeywordsValid(data.keywords)){
+		return jsonResponse({ "error": 1024, "info": "You need to have from 3 to 20 keywords. Keywords needs to be separated with comma and string can't be longer than 255 characters." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	if(!(await isPostIDTaken(data.username, data.id))){
+		return jsonResponse({ "error": 1025, "info": "You can't edit post that doesn't exists. Please create post first." });
+	}
+
+	let read = Math.round(getWordCount(data.markdown) / 200);
+	try{
+		await env.DB.prepare("UPDATE posts SET title = ?, description = ?, picture = ?, markdown = ?, category = ?, language = ?, tag = ?, keywords = ?, read_time = ? WHERE username = ? AND id = ?").bind(data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, read, data.username, data.id).run();
+	}catch(error){
+		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to edit your post." });
+	}
+
+	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
 router.post("/deletePost", async request => {
 	let data = {};
 
