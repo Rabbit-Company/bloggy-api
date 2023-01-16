@@ -591,9 +591,16 @@ router.post("/getImages", async request => {
 	}
 
 	try{
-		const images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
-		let keys = images.objects.map(obj => obj.key.split('/')[2]);
-		return jsonResponse({ "error": 0, "info": "Success", "images": keys });
+		let images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
+		images = images.objects;
+		let jsonImages = {};
+		for(let i = 0; i < images.length; i++){
+			let key = images[i].key.split('/')[2];
+			jsonImages[key] = {};
+			jsonImages[key].uploaded = images[i].uploaded;
+			jsonImages[key].size = images[i].size;
+		}
+		return jsonResponse({ "error": 0, "info": "Success", "images": jsonImages });
 	}catch{};
 	return jsonResponse({ "error": 1008, "info": "Something went wrong while trying to get the images." });
 });
