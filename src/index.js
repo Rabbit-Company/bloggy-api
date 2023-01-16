@@ -539,6 +539,16 @@ router.put("/saveImage", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
+	if(!request.headers.has('File-Type')) {
+		return jsonResponse({ "error": 1031, "info": "File-Type header needs to be provided." });
+	}
+
+	let supportedImageFileTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp'];
+	let contentType = request.headers.get('File-Type');
+	if(!supportedImageFileTypes.includes(contentType)){
+		return jsonResponse({ "error": 1032, "info": "File type is not supported. Please upload .png, .jpg, .gif, .svg or .webp" });
+	}
+
 	let fileSize = request.headers.get('Content-Length');
 	if(fileSize > 500_000){
 		return jsonResponse({ "error": 1029, "info": "Image can't be bigger than 500kB. Please choose smaller image." });
@@ -561,7 +571,13 @@ router.put("/saveImage", async request => {
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
-	await env.R2.put("images/" + auth.user + "/" + uuidv4(), request.body);
+	const options = {
+		httpMetadata: {
+			contentType: contentType,
+		},
+	}
+
+	await env.R2.put("images/" + auth.user + "/" + uuidv4(), request.body, options);
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
