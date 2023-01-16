@@ -2,6 +2,7 @@ import { Router } from 'itty-router';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { v4 as uuidv4 } from 'uuid';
+import { validate as uuidValidate } from 'uuid';
 const router = Router();
 
 const cache = caches.default;
@@ -129,6 +130,11 @@ function isPostMarkdownValid(markdown){
 	if(markdown.length > 100000) return false;
 	let words = getWordCount(markdown);
 	return (words >= 150 && words <= 10000);
+}
+
+function isUUIDValid(uuid){
+	if(typeof(uuid) !== 'string' || uuid === null) return false;
+	return uuidValidate(uuid);
 }
 
 function generateNonce(){
@@ -586,10 +592,46 @@ router.post("/getImages", async request => {
 
 	try{
 		const images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
-		let keys = images.objects.map(obj => env.CDN + "/" + obj.key);
+		let keys = images.objects.map(obj => obj.key.split('/')[2]);
 		return jsonResponse({ "error": 0, "info": "Success", "images": keys });
 	}catch{};
-	return jsonResponse({ "error": 1008, "info": "Something went wrong while trying to the get images." });
+	return jsonResponse({ "error": 1008, "info": "Something went wrong while trying to get the images." });
+});
+
+router.post("/deleteImage", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token || !data.image){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, image" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!isUUIDValid(data.image)){
+		return jsonResponse({ "error": 1030, "info": "Image name is invalid." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		await env.R2.delete("images/" + data.username + "/" + data.image);
+		return jsonResponse({ "error": 0, "info": "Success" });
+	}catch{};
+	return jsonResponse({ "error": 1008, "info": "Something went wrong while trying to delete the image." });
 });
 
 router.post("/createPost", async request => {
