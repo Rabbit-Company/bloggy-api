@@ -1,6 +1,7 @@
 import { Router } from 'itty-router';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
+import { v4 as uuidv4 } from 'uuid';
 const router = Router();
 
 const cache = caches.default;
@@ -524,6 +525,37 @@ router.put("/saveAvatar", async request => {
 	}
 
 	await env.R2.put("avatars/" + auth.user, request.body);
+	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
+router.put("/saveImage", async request => {
+	if(!request.headers.has('Authorization')) {
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	let fileSize = request.headers.get('Content-Length');
+	if(fileSize > 500_000){
+		return jsonResponse({ "error": 1029, "info": "Image can't be bigger than 500kB. Please choose smaller image." });
+	}
+
+	const auth = basicAuthentication(request);
+	if(auth == null){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	if(!isUsernameValid(auth.user)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(auth.pass)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!(await isAuthorized(auth.user, auth.pass))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	await env.R2.put("images/" + auth.user + "/" + uuidv4(), request.body);
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
