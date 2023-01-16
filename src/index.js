@@ -593,12 +593,12 @@ router.post("/getImages", async request => {
 	try{
 		let images = await env.R2.list({ prefix: `images/${data.username}/`, delimiter: '/' });
 		images = images.objects;
-		let jsonImages = {};
+		let jsonImages = [];
 		for(let i = 0; i < images.length; i++){
 			let key = images[i].key.split('/')[2];
-			jsonImages[key] = {};
-			jsonImages[key].uploaded = images[i].uploaded;
-			jsonImages[key].size = images[i].size;
+			let uploaded = images[i].uploaded;
+			let size = images[i].size;
+			jsonImages.push({ key: key, uploaded: uploaded, size: size });
 		}
 		return jsonResponse({ "error": 0, "info": "Success", "images": jsonImages });
 	}catch{};
