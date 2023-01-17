@@ -15,6 +15,7 @@ const themes = ['light'];
 const categories = ['Art and Design', 'Book and Writing', 'Business', 'Car', 'DIY Craft', 'Fashion and Beauty', 'Finance', 'Food', 'Gaming', 'Health and Fitness', 'Lifestyle', 'Movie', 'Music', 'News', 'Parenting', 'Personal', 'Pet', 'Political', 'Religion', 'Review', 'Sports', 'Technology', 'Travel'];
 const languages = ['ab','aa','af','ak','sq','am','ar','an','hy','as','av','ae','ay','az','bm','ba','eu','be','bn','bh','bi','bs','br','bg','my','ca','km','ch','ce','ny','zh','cu','cv','kw','co','cr','hr','cs','da','dv','nl','dz','en','eo','et','ee','fo','fj','fi','fr','ff','gd','gl','lg','ka','de','ki','el','kl','gn','gu','ht','ha','he','hz','hi','ho','hu','is','io','ig','id','ia','ie','iu','ik','ga','it','ja','jv','kn','kr','ks','kk','rw','kv','kg','ko','kj','ku','ky','lo','la','lv','lb','li','ln','lt','lu','mk','mg','ms','ml','mt','gv','mi','mr','mh','ro','mn','na','nv','nd','ng','ne','se','no','nb','nn','ii','oc','oj','or','om','os','pi','pa','ps','fa','pl','pt','qu','rm','rn','ru','sm','sg','sa','sc','sr','sn','sd','si','sk','sl','so','st','nr','es','su','sw','ss','sv','tl','ty','tg','ta','tt','te','th','bo','ti','to','ts','tn','tr','tk','tw','ug','uk','ur','uz','ve','vi','vo','wa','cy','fy','wo','xh','yi','yo','za','zu'];
 const supportedImageFileTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp'];
+const validSocialMedia = { 'website': false, 'discord': 'https://discord.gg/', 'twitter': 'https://twitter.com/', 'github': 'https://github.com/' }
 
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
@@ -136,6 +137,32 @@ function isPostMarkdownValid(markdown){
 function isUUIDValid(uuid){
 	if(typeof(uuid) !== 'string' || uuid === null) return false;
 	return uuidValidate(uuid);
+}
+
+function isURLValid(url){
+	try{
+		new URL(url);
+		return true;
+	}catch{}
+	return false;
+}
+
+function isSocialValid(social){
+	if(typeof(social) !== 'object') return false;
+	let keys = Object.keys(social);
+	let vsm = Object.keys(validSocialMedia);
+	if(keys.length > 10) return false;
+	for(let i = 0; i < keys.length; i++){
+		let platform = keys[i];
+		if(!vsm.includes(platform)) return false;
+		let url = social[keys[i]];
+		if(!isURLValid(url)) return false;
+		let validator = validSocialMedia[platform];
+		if(validator != false){
+			if(!url.startsWith(validator)) return false;
+		}
+	}
+	return true;
 }
 
 function generateNonce(){
@@ -859,6 +886,46 @@ router.post("/deletePost", async request => {
 		await env.DB.prepare("DELETE FROM posts WHERE username = ?1 AND id = ?2").bind(data.username, data.id).run();
 	}catch(error){
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to delete your post. Please try again later." });
+	}
+
+	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
+router.post("/updateSocialMedia", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token || !data.social){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, social" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	if(!(await isPostIDTaken(data.username, data.id))){
+		return jsonResponse({ "error": 1025, "info": "You can't edit post that doesn't exists. Please create post first." });
+	}
+
+	let read = Math.round(getWordCount(data.markdown) / 200);
+	try{
+		await env.DB.prepare("UPDATE posts SET title = ?, description = ?, picture = ?, markdown = ?, category = ?, language = ?, tag = ?, keywords = ?, read_time = ? WHERE username = ? AND id = ?").bind(data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, read, data.username, data.id).run();
+	}catch(error){
+		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to edit your post." });
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
