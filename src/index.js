@@ -1239,7 +1239,7 @@ router.post("/generatePages", async request => {
 
 		let html = "<h1 class='post-title'>" + title + "</h1>";
 		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + new Date(created).toISOString().split('T')[0] + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
-		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
+		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "'>" + rUser.author + "</a></p></div></div>";
 
 		let postHtml = marked.parse(markdown, {
 			gfm: true,
