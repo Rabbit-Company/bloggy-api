@@ -912,20 +912,18 @@ router.post("/updateSocialMedia", async request => {
 		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
 	}
 
+	if(!isSocialValid(data.social)){
+		return jsonResponse({ "error": 1033, "info": "Social media is invalid." });
+	}
 
 	if(!(await isAuthorized(data.username, data.token))){
 		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
 	}
 
-	if(!(await isPostIDTaken(data.username, data.id))){
-		return jsonResponse({ "error": 1025, "info": "You can't edit post that doesn't exists. Please create post first." });
-	}
-
-	let read = Math.round(getWordCount(data.markdown) / 200);
 	try{
-		await env.DB.prepare("UPDATE posts SET title = ?, description = ?, picture = ?, markdown = ?, category = ?, language = ?, tag = ?, keywords = ?, read_time = ? WHERE username = ? AND id = ?").bind(data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, read, data.username, data.id).run();
+		await env.DB.prepare("UPDATE creators SET social = ? WHERE username = ?").bind(JSON.stringify(data.social), data.username).run();
 	}catch(error){
-		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to edit your post." });
+		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to update social media." });
 	}
 
 	return jsonResponse({ "error": 0, "info": "Success" });
