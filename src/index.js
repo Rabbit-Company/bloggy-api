@@ -769,7 +769,7 @@ router.post("/createPost", async request => {
 
 	let read = Math.round(getWordCount(data.markdown) / 200);
 	try{
-		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, category, language, tag, keywords, created, read_time) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, date, read).run();
+		await env.DB.prepare("INSERT INTO posts(id, username, title, description, picture, markdown, category, language, tag, keywords, created, read_time) VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)").bind(data.id, data.username, data.title, data.description, data.picture, data.markdown, data.category, data.language, data.tag, data.keywords, new Date().toISOString(), read).run();
 	}catch(error){
 		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to store your post in the database." });
 	}
@@ -1181,7 +1181,7 @@ router.post("/generatePages", async request => {
 		posts[id].read = read_time;
 
 		if(i < limit){
-			userHtml += `<div class='flex flex-col overflow-hidden rounded-lg shadow-lg'><div class='flex-shrink-0'><img class='h-48 w-full object-cover' src='${picture}' alt='${title}'></div><div class='flex flex-1 flex-col justify-between bg-white p-6'><div class='flex-1'><p class='text-sm font-medium text-indigo-600'><a href='/creator/${username}?tag=${tag.replaceAll(" ", "_")}' class='hover:underline'>${tag}</a></p><a href='${postLocation}' class='mt-2 block'><p class='text-xl font-semibold text-gray-900'>${title}</p><p class='mt-3 text-base text-gray-500'>${description}</p></a></div><div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/${username}'><span class='sr-only'>${rUser.author}</span><img class='h-10 w-10 rounded-full' src='${avatar}' alt='${rUser.author}'></a></div><div class='ml-3'><p class='text-sm font-medium text-gray-900'><a href='/creator/${username}' class='hover:underline'>${rUser.author}</a></p><div class='flex space-x-1 text-sm text-gray-500'><time datetime='${created}'>${created}</time><span aria-hidden='true'>&middot;</span><span>${read_time} min read</span></div></div></div></div></div>`;
+			userHtml += `<div class='flex flex-col overflow-hidden rounded-lg shadow-lg'><div class='flex-shrink-0'><img class='h-48 w-full object-cover' src='${picture}' alt='${title}'></div><div class='flex flex-1 flex-col justify-between bg-white p-6'><div class='flex-1'><p class='text-sm font-medium text-indigo-600'><a href='/creator/${username}?tag=${tag.replaceAll(" ", "_")}' class='hover:underline'>${tag}</a></p><a href='${postLocation}' class='mt-2 block'><p class='text-xl font-semibold text-gray-900'>${title}</p><p class='mt-3 text-base text-gray-500'>${description}</p></a></div><div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/${username}'><span class='sr-only'>${rUser.author}</span><img class='h-10 w-10 rounded-full' src='${avatar}' alt='${rUser.author}'></a></div><div class='ml-3'><p class='text-sm font-medium text-gray-900'><a href='/creator/${username}' class='hover:underline'>${rUser.author}</a></p><div class='flex space-x-1 text-sm text-gray-500'><time datetime='${created}'>${new Date(created).toISOString().split('T')[0]}</time><span aria-hidden='true'>&middot;</span><span>${read_time} min read</span></div></div></div></div></div>`;
 		}
 
 		let wordCount = getWordCount(markdown);
@@ -1238,7 +1238,7 @@ router.post("/generatePages", async request => {
 		tempTemplate = tempTemplate.replaceAll("::social::", social);
 
 		let html = "<h1 class='post-title'>" + title + "</h1>";
-		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + created + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
+		html += "<div class='flex space-x-1 f16'><time datetime='" + created + "'>" + new Date(created).toISOString().split('T')[0] + "</time><span aria-hidden='true'>&middot;</span><span>" + read_time + " min read</span></div>";
 		html += "<div class='mt-6 flex items-center'><div class='flex-shrink-0'><a href='/creator/" + username + "/'><span class='sr-only'>" + rUser.author + "</span><img class='h-12 w-12 rounded-full' src='" + avatar + "' alt='" + rUser.author + "'></a></div><div class='ml-3'><p class='f16 font-medium'><a href='/creator/" + username + "/'>" + rUser.author + "</a></p></div></div>";
 
 		let postHtml = marked.parse(markdown, {
