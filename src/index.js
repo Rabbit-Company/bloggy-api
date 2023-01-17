@@ -351,7 +351,7 @@ router.post("/login", async request => {
 					"author": userData.author,
 					"category": userData.category,
 					"language": userData.language,
-					"social": userData.social,
+					"social": null,
 					"theme": userData.theme,
 					"advertisement": userData.advertisement,
 					"yubico": userData.yubico_otp,
@@ -359,6 +359,9 @@ router.post("/login", async request => {
 					"created": userData.created
 				};
 				userJson.fa_enabled = (userData.fa_secret !== null);
+				try{
+					userJson.social = JSON.parse(userData.social);
+				}catch{}
 				try{
 					if(userData.accessed != date) await env.DB.prepare("UPDATE creators SET accessed = ?1 WHERE username = ?2").bind(date, data.username).run();
 				}catch{}
