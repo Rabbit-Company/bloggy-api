@@ -1328,7 +1328,7 @@ export default {
 			headers: {
 				'content-type': 'application/json',
 			},
-			body: body
+			body: JSON.stringify(body)
 		};
 		const response = await fetch("https://api.bloggy.io/generateMainPage", options);
 		return new Response(response);
