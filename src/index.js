@@ -1321,4 +1321,16 @@ export default {
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
 		return router.handle(request2);
 	},
+	async scheduled(controller, env, ctx) {
+		const body = { username: 'admin', token: env.TOKEN };
+		const options = {
+			method: "POST",
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: body
+		};
+		const response = await fetch("https://api.bloggy.io/generateMainPage", options);
+		return new Response(response);
+	},
 };

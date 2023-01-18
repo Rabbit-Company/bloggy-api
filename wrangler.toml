@@ -16,6 +16,9 @@ database_id = "92ee90cf-925c-423c-b66b-57ec81663c1e"
 binding = 'R2'
 bucket_name = 'bloggy'
 
+[triggers]
+crons = ["0 */1 * * *"]
+
 [vars]
 DOMAIN = "https://bloggy.io"
 CDN = "https://cdn.bloggy.io"
