@@ -1330,7 +1330,6 @@ export default {
 			},
 			body: JSON.stringify(body)
 		};
-		const response = await fetch("https://api.bloggy.io/generateMainPage", options);
-		return new Response(response);
+		ctx.waitUntil(fetch("https://api.bloggy.io/generateMainPage", options));
 	},
 };
