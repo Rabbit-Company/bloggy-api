@@ -528,7 +528,7 @@ router.post("/getPosts", async request => {
 	}
 
 	try{
-		const { results } = await env.DB.prepare("SELECT * FROM posts WHERE username = ?1").bind(data.username).all();
+		const { results } = await env.DB.prepare("SELECT * FROM posts WHERE username = ? ORDER BY created DESC").bind(data.username).all();
 		return jsonResponse({ "error": 0, "info": "Success", "data": results });
 	}catch{};
 	return jsonResponse({ "error": 1008, "info": "Something went wrong while connecting to the database." });
@@ -1085,7 +1085,7 @@ router.post("/generatePages", async request => {
 
 	let rPost = {};
 	try{
-		rPost = await env.DB.prepare("SELECT * FROM posts WHERE username = ?").bind(data.username).all();
+		rPost = await env.DB.prepare("SELECT * FROM posts WHERE username = ? ORDER BY created DESC").bind(data.username).all();
 	}catch{
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch all posts. Please try again later." });
 	}
