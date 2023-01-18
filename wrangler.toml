@@ -17,7 +17,7 @@ binding = 'R2'
 bucket_name = 'bloggy'
 
 [vars]
-DOMAIN = "https://test.bloggy.io"
+DOMAIN = "https://bloggy.io"
 CDN = "https://cdn.bloggy.io"
 TITLE = "Bloggy"
 DESCRIPTION = "Simple and open source network for creators"
