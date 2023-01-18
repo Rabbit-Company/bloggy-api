@@ -595,8 +595,8 @@ router.put("/saveImage", async request => {
 	}
 
 	let fileSize = request.headers.get('Content-Length');
-	if(fileSize > 500_000){
-		return jsonResponse({ "error": 1029, "info": "Image can't be bigger than 500kB. Please choose smaller image." });
+	if(fileSize > 1_000_000){
+		return jsonResponse({ "error": 1029, "info": "Image can't be bigger than 1MB. Please choose smaller image." });
 	}
 
 	const auth = basicAuthentication(request);
