@@ -339,7 +339,7 @@ router.post("/login", async request => {
 		if(results.length == 1){
 			let userData = results[0];
 			try{
-				let results = await env.DB.prepare("SELECT * FROM posts WHERE username = ?1").bind(data.username).all();
+				let results = await env.DB.prepare("SELECT * FROM posts WHERE username = ?1 ORDER BY created DESC").bind(data.username).all();
 				let postData = results.results;
 				let token = await forceGetToken(data.username);
 				let userJson = {
@@ -973,7 +973,7 @@ router.post("/generateMainPage", async request => {
 
 	let rPosts = {};
 	try{
-		rPosts = await env.DB.prepare("SELECT id, username FROM posts").all();
+		rPosts = await env.DB.prepare("SELECT id, username FROM posts ORDER BY created DESC").all();
 	}catch{
 		return jsonResponse({ "error": 1017, "info": "Something went wrong while trying to fetch posts. Please try again later." });
 	}
