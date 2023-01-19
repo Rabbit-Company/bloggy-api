@@ -891,6 +891,64 @@ router.post("/deletePost", async request => {
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
+router.post("/updateSettings", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token || !data.title || !data.description || !data.author || !data.category || !data.language || !data.theme){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token, title, description, author, category, language, theme" });
+	}
+
+	if(!isUsernameValid(data.username)){
+		return jsonResponse({ "error": 1002, "info": "Username can only contain lowercase characters, numbers and hyphens. It also needs to start with lowercase character and be between 4 and 30 characters long." });
+	}
+
+	if(!isTokenValid(data.token)){
+		return jsonResponse({ "error": 1015, "info": "Token is invalid. Please login first to get the token." });
+	}
+
+	if(!isTitleValid(data.title)){
+		return jsonResponse({ "error": 1009, "info": "Title needs to be between 3 and 30 characters long." });
+	}
+
+	if(!isDescriptionValid(data.description)){
+		return jsonResponse({ "error": 1010, "info": "Description needs to be between 30 and 160 characters long." });
+	}
+
+	if(!isAuthorValid(data.author)){
+		return jsonResponse({ "error": 1011, "info": "Author needs to be between 5 and 30 characters long." });
+	}
+
+	if(!isCategoryValid(data.category)){
+		return jsonResponse({ "error": 1012, "info": "Category is invalid." });
+	}
+
+	if(!isLanguageValid(data.language)){
+		return jsonResponse({ "error": 1013, "info": "Language is invalid. Please use ISO 639-1." });
+	}
+
+	if(!isThemeValid(data.theme)){
+		return jsonResponse({ "error": 1014, "info": "Theme is invalid." });
+	}
+
+	if(!(await isAuthorized(data.username, data.token))){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	try{
+		await env.DB.prepare("UPDATE creators SET title = ?, description = ?, author = ?, category = ?, language = ?, theme = ? WHERE username = ?").bind(data.title, data.description, data.author, data.category, data.language, data.theme, data.username).run();
+	}catch(error){
+		return jsonResponse({ "error": 1026, "info": "Something went wrong while trying to update blog settings." });
+	}
+
+	return jsonResponse({ "error": 0, "info": "Success" });
+});
+
 router.post("/updateSocialMedia", async request => {
 	let data = {};
 
