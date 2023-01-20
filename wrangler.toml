@@ -25,7 +25,7 @@ CDN = "https://cdn.bloggy.io"
 TITLE = "Bloggy"
 DESCRIPTION = "Simple and open source network for creators"
 AUTHOR = "Rabbit Company"
-ANALYTICS = "<script defer data-domain='bloggy.io' src='https://analytics.rabbit-company.com/js/plausible.js'></script>"
+ANALYTICS = "<script defer data-domain='bloggy.io' src='https://analytics.bloggy.io/js/analytics.js'></script>"
 LANGUAGE = "en"
 # Optional variables
 WEBSITE = "https://rabbit-company.com"
