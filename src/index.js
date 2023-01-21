@@ -20,7 +20,7 @@ const validSocialMedia = { 'website': false, 'discord': 'https://discord.gg/', '
 function jsonResponse(json, statusCode = 200){
 	if(typeof(json) !== 'string') json = JSON.stringify(json);
 	return new Response(json, {
-		headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Max-Age': '86400' },
+		headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Max-Age': '86400' },
 		status: statusCode
 	});
 }
@@ -1366,7 +1366,7 @@ export default {
 		env = env2;
 
 		if(request.method.toLowerCase() === "options") {
-			return new Response("ok", { headers: { 'Access-Control-Allow-Origin': 'https://panel.bloggy.io', 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS', 'Access-Control-Allow-Headers': '*' } });
+			return new Response("ok", { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS', 'Access-Control-Allow-Headers': '*' } });
 		}
 
 		date = new Date().toISOString().split('T')[0];
