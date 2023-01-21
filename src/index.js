@@ -1005,9 +1005,7 @@ router.post("/generateMainPage", async request => {
 	}
 
 	// Robots
-	let robots = `User-agent: *
-	Disallow: /cgi-bin/
-	Sitemap: ${env.DOMAIN}/sitemap.xml`;
+	let robots = `User-agent: *\nDisallow: /cgi-bin/\nSitemap: ${env.DOMAIN}/sitemap.xml`;
 	await setPageValue('robots', robots);
 
 	// Service Worker
