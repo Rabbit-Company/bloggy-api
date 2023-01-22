@@ -1009,7 +1009,7 @@ router.post("/generateMainPage", async request => {
 	await setPageValue('robots', robots);
 
 	// Service Worker
-	let serviceWorker = `const CACHE="pwa";importScripts("https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js"),self.addEventListener("message",e=>{e.data&&"SKIP_WAITING"===e.data.type&&self.skipWaiting()}),workbox.routing.registerRoute(({request:e,url:a})=>"navigate"===e.mode&&!a.pathname.startsWith("https://analytics"),new workbox.strategies.StaleWhileRevalidate({cacheName:"pwa"}));`;
+	let serviceWorker = `let stamp = ${new Date().getTime()};const CACHE="pwa";importScripts("https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js"),self.addEventListener("message",e=>{e.data&&"SKIP_WAITING"===e.data.type&&self.skipWaiting()}),workbox.routing.registerRoute(({request:e,url:a})=>"navigate"===e.mode&&!a.pathname.startsWith("https://analytics"),new workbox.strategies.StaleWhileRevalidate({cacheName:"pwa"}));`;
 	await setPageValue('service-worker', serviceWorker);
 
 	// Manifest
