@@ -7,7 +7,6 @@ const router = Router();
 
 const cache = caches.default;
 let date;
-let request;
 let env;
 let hashedIP;
 
@@ -187,7 +186,7 @@ async function generateHash(message){
 }
 
 async function setAdminValue(key, value, expirationTime = null, cacheTime = 60){
-	let cacheKey = request.url + "?key=" + key;
+	let cacheKey = "https://api.bloggy.io?key=" + key;
 	if(expirationTime === null){
 		await env.AKV.put(key, value);
 	}else{
@@ -199,7 +198,7 @@ async function setAdminValue(key, value, expirationTime = null, cacheTime = 60){
 }
 
 async function setPageValue(key, value, expirationTime = null, cacheTime = 60){
-	let cacheKey = request.url + "?key=" + key;
+	let cacheKey = "https://api.bloggy.io?key=" + key;
 	if(expirationTime === null){
 		await env.PKV.put(key, value);
 	}else{
@@ -213,7 +212,7 @@ async function setPageValue(key, value, expirationTime = null, cacheTime = 60){
 async function getAdminValue(key, cacheTime = 60){
 	let value = null;
 
-	let cacheKey = request.url + "?key=" + key;
+	let cacheKey = "https://api.bloggy.io?key=" + key;
 	let res = await cache.match(cacheKey);
 	if(res) value = await res.text();
 
@@ -230,7 +229,7 @@ async function getAdminValue(key, cacheTime = 60){
 async function getPageValue(key, cacheTime = 60){
 	let value = null;
 
-	let cacheKey = request.url + "?key=" + key;
+	let cacheKey = "https://api.bloggy.io?key=" + key;
 	let res = await cache.match(cacheKey);
 	if(res) value = await res.text();
 
@@ -246,12 +245,12 @@ async function getPageValue(key, cacheTime = 60){
 
 async function deleteAdminValue(key){
 	await env.AKV.delete(key);
-	await cache.delete(request.url + "?key=" + key);
+	await cache.delete("https://api.bloggy.io?key=" + key);
 }
 
 async function deletePageValue(key){
 	await env.PKV.delete(key);
-	await cache.delete(request.url + "?key=" + key);
+	await cache.delete("https://api.bloggy.io?key=" + key);
 }
 
 async function forceGetToken(username){
@@ -1365,8 +1364,7 @@ router.all("*", () => {
 });
 
 export default {
-	async fetch(request2, env2){
-		request = request2;
+	async fetch(request, env2){
 		env = env2;
 
 		if(request.method.toLowerCase() === "options") {
@@ -1374,14 +1372,13 @@ export default {
 		}
 
 		date = new Date().toISOString().split('T')[0];
-		let IP = request2.headers.get('CF-Connecting-IP');
+		let IP = request.headers.get('CF-Connecting-IP');
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
-		return router.handle(request2);
+		return router.handle(request);
 	},
 	async scheduled(controller, env2, ctx) {
 		env = env2;
 		date = new Date().toISOString().split('T')[0];
-		const json = await generateMainPage();
-		if(json.error != 0) throw new Error("Error code: " + json.error);
+		await generateMainPage();
 	},
 };
