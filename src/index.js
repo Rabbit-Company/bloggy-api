@@ -1374,8 +1374,9 @@ export default {
 		hashedIP = await generateHash("rabbitcompany" + IP + date, 'SHA-256');
 		return router.handle(request2);
 	},
-	async scheduled(controller, env, ctx) {
-		const body = { username: 'admin', token: env.TOKEN };
+	async scheduled(controller, env2, ctx) {
+		env = env2;
+		const body = { username: 'admin', token: env2.TOKEN };
 		const options = {
 			method: "POST",
 			headers: {
