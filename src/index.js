@@ -1380,6 +1380,7 @@ export default {
 	},
 	async scheduled(controller, env2, ctx) {
 		env = env2;
+		date = new Date().toISOString().split('T')[0];
 		const json = await generateMainPage();
 		if(json.error != 0) throw new Error("Error code: " + json.error);
 	},
