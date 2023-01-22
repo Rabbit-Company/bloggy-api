@@ -1383,6 +1383,13 @@ export default {
 			},
 			body: JSON.stringify(body)
 		};
-		await fetch("https://api.bloggy.io/generateMainPage", options);
+		const res = await fetch("https://api.bloggy.io/generateMainPage", options);
+		if(res.status !== 200) throw new Error("Unexpected status code: " + res.status);
+		try{
+			let json = await res.json();
+			if(json.error != 0) throw new Error("Error code: " + json.error);
+		}catch{
+			throw new Error("Invalid json!");
+		}
 	},
 };
