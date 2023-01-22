@@ -1383,6 +1383,6 @@ export default {
 			},
 			body: JSON.stringify(body)
 		};
-		ctx.waitUntil(fetch("https://api.bloggy.io/generateMainPage", options));
+		await fetch("https://api.bloggy.io/generateMainPage", options);
 	},
 };
