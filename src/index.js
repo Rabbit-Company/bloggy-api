@@ -987,23 +987,7 @@ router.post("/updateSocialMedia", async request => {
 	return jsonResponse({ "error": 0, "info": "Success" });
 });
 
-router.post("/generateMainPage", async request => {
-	let data = {};
-
-	try{
-		data = await request.json();
-	}catch{
-		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
-	}
-
-	if(!data.username || !data.token){
-		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
-	}
-
-	if(data.username !== "admin" || data.token !== env.TOKEN){
-		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
-	}
-
+async function generateMainPage(){
 	// Robots
 	let robots = `User-agent: *\nDisallow: /cgi-bin/\nSitemap: ${env.DOMAIN}/sitemap.xml`;
 	await setPageValue('robots', robots);
@@ -1070,9 +1054,9 @@ router.post("/generateMainPage", async request => {
 	let logo = env.DOMAIN + "/images/logo.png";
 	const jsondl = {
 		"@context": "https://schema.org",
-    "@type": "Organization",
-    "url": env.DOMAIN,
-    "logo": logo
+		"@type": "Organization",
+		"url": env.DOMAIN,
+		"logo": logo
 	};
 	tempTemplate = tempTemplate.replaceAll("::jsondl::", JSON.stringify(jsondl));
 
@@ -1101,6 +1085,26 @@ router.post("/generateMainPage", async request => {
 	await setPageValue('sitemap', siteMap);
 
 	return jsonResponse({ "error": 0, "info": "Success" });
+}
+
+router.post("/generateMainPage", async request => {
+	let data = {};
+
+	try{
+		data = await request.json();
+	}catch{
+		return jsonResponse({ "error": 1000, "info": "Data needs to be submitted in json format." });
+	}
+
+	if(!data.username || !data.token){
+		return jsonResponse({ "error": 1001, "info": "Not all required data provided in json format. Required data: username, token" });
+	}
+
+	if(data.username !== "admin" || data.token !== env.TOKEN){
+		return jsonResponse({ "error": 1016, "info": "You are not authorized to perform this action." });
+	}
+
+	return await generateMainPage();
 });
 
 router.post("/generatePages", async request => {
@@ -1376,21 +1380,7 @@ export default {
 	},
 	async scheduled(controller, env2, ctx) {
 		env = env2;
-		const body = { username: 'admin', token: env2.TOKEN };
-		const options = {
-			method: "POST",
-			headers: {
-				'content-type': 'application/json',
-			},
-			body: JSON.stringify(body)
-		};
-		const res = await fetch("https://api.bloggy.io/generateMainPage", options);
-		if(res.status !== 200) throw new Error("Unexpected status code: " + res.status);
-		try{
-			let json = await res.json();
-			if(json.error != 0) throw new Error("Error code: " + json.error);
-		}catch{
-			throw new Error("Invalid json!");
-		}
+		const json = await generateMainPage();
+		if(json.error != 0) throw new Error("Error code: " + json.error);
 	},
 };
