@@ -1,6 +1,6 @@
 name = "bloggy-api"
 main = "src/index.js"
-compatibility_date = "2023-01-12"
+compatibility_date = "2023-11-26"
 
 kv_namespaces = [
   { binding = "AKV", id = "854c863c76a548e491b1141a6dcd9439" },
