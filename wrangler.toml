@@ -1,6 +1,6 @@
 name = "bloggy-api"
 main = "src/index.js"
-compatibility_date = "2023-11-26"
+compatibility_date = "2024-08-24"
 
 kv_namespaces = [
   { binding = "AKV", id = "854c863c76a548e491b1141a6dcd9439" },
@@ -9,8 +9,8 @@ kv_namespaces = [
 
 [[d1_databases]]
 binding = "DB"
-database_name = "bloggy"
-database_id = "92ee90cf-925c-423c-b66b-57ec81663c1e"
+database_name = "bloggy2"
+database_id = "54d88e41-e3e8-4cee-abac-51d8edbc39b6"
 
 [[r2_buckets]]
 binding = 'R2'
